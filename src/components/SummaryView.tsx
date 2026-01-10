@@ -9,9 +9,10 @@ type Props = {
 };
 
 const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}m ${s}s`;
+    const absSeconds = Math.abs(seconds);
+    const m = Math.floor(absSeconds / 60);
+    const s = absSeconds % 60;
+    return `${seconds < 0 ? '-' : ''}${m}m ${s}s`;
 };
 
 export const SummaryView: React.FC<Props> = ({ steps, completedSteps, onReset }) => {

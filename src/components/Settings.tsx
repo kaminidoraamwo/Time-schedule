@@ -15,6 +15,9 @@ type Props = {
     onSavePreset: (name: string) => void;
     onLoadPreset: (id: string) => void;
     onDeletePreset: (id: string) => void;
+    // onRequestNotificationPermission removed from props interface as we handle it inside with feedback, 
+    // but keeping it if passed from parent or we can use the logic directly here.
+    // Actually, let's keep the prop but enhance the UI using local state for display.
     onRequestNotificationPermission: () => void;
 };
 
@@ -34,6 +37,25 @@ export const Settings: React.FC<Props> = ({
     onRequestNotificationPermission,
 }) => {
     const [newPresetName, setNewPresetName] = useState('');
+    const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>(
+        typeof Notification !== 'undefined' ? Notification.permission : 'default'
+    );
+
+    const handleRequestPermission = () => {
+        if (permissionStatus === 'granted') {
+            alert('通知は既に許可されています。');
+            return;
+        }
+        if (permissionStatus === 'denied') {
+            alert('通知がブロックされています。ブラウザの設定から許可してください。');
+            return;
+        }
+        onRequestNotificationPermission();
+        // Check again after a short delay
+        setTimeout(() => {
+            setPermissionStatus(Notification.permission);
+        }, 1000);
+    };
 
     if (!isOpen) return null;
 
@@ -193,10 +215,12 @@ export const Settings: React.FC<Props> = ({
                             デフォルトに戻す
                         </button>
                         <button
-                            onClick={onRequestNotificationPermission}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                            onClick={handleRequestPermission}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline flex items-center gap-1"
                         >
-                            🔔 通知を許可
+                            {permissionStatus === 'granted' ? '✅ 通知許可済み' :
+                                permissionStatus === 'denied' ? '🚫 通知拒否設定' :
+                                    '🔔 通知を許可'}
                         </button>
                     </div>
                     <button

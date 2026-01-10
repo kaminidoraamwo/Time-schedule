@@ -87,7 +87,8 @@ function App() {
             </div>
             <button
               onClick={start}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-3xl font-bold py-8 px-16 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95"
+              disabled={steps.length === 0}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-3xl font-bold py-8 px-16 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95 disabled:hover:scale-100 disabled:active:scale-100"
             >
               スタート
             </button>
