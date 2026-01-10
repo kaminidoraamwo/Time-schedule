@@ -98,6 +98,19 @@ export const Settings: React.FC<Props> = ({
                         )}
                     </div>
 
+                    {/* Total Duration Display */}
+                    <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600 font-medium">合計時間</span>
+                            <span className="text-2xl font-bold text-gray-800">
+                                {Math.floor(steps.reduce((acc, s) => acc + s.durationMinutes, 0) / 60)}時間 {steps.reduce((acc, s) => acc + s.durationMinutes, 0) % 60}分
+                            </span>
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">
+                            {steps.length} 工程
+                        </div>
+                    </div>
+
                     <h3 className="text-lg font-bold text-gray-800 mb-3">スケジュール編集</h3>
                     <div className="space-y-4">
                         {steps.map((step, index) => (
