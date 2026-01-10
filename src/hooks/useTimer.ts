@@ -44,7 +44,11 @@ export const useTimer = (steps: Step[]) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [state]);
 
+    // Update 'now' every second when active, and also on initial load
     useEffect(() => {
+        // Immediately sync 'now' on mount to ensure real-time calculation
+        setNow(Date.now());
+
         let interval: number;
         if (state.isActive) {
             interval = setInterval(() => {
@@ -86,10 +90,6 @@ export const useTimer = (steps: Step[]) => {
 
             const nextIndex = prev.currentStepIndex + 1;
             const isFinished = nextIndex >= steps.length;
-
-            // Reset sound flags for next step
-            setHasPlayedChime(false);
-            setHasPlayedFinish(false);
 
             // Reset sound flags for next step
             setHasPlayedChime(false);
