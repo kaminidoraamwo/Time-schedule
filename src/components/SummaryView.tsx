@@ -21,16 +21,16 @@ export const SummaryView: React.FC<Props> = ({ steps, completedSteps, onReset })
 
     return (
         <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold mb-6 text-center">Result Summary</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">結果サマリー</h2>
 
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b-2 border-gray-200">
-                            <th className="py-3 px-2">Step</th>
-                            <th className="py-3 px-2 text-right">Planned</th>
-                            <th className="py-3 px-2 text-right">Actual</th>
-                            <th className="py-3 px-2 text-right">Diff</th>
+                            <th className="py-3 px-2">工程</th>
+                            <th className="py-3 px-2 text-right">予定</th>
+                            <th className="py-3 px-2 text-right">実際</th>
+                            <th className="py-3 px-2 text-right">差分</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,7 +51,7 @@ export const SummaryView: React.FC<Props> = ({ steps, completedSteps, onReset })
                             );
                         })}
                         <tr className="bg-gray-50 font-bold">
-                            <td className="py-4 px-2">Total</td>
+                            <td className="py-4 px-2">合計</td>
                             <td className="py-4 px-2 text-right">{formatTime(totalPlanned)}</td>
                             <td className="py-4 px-2 text-right">{formatTime(totalActual)}</td>
                             <td className={`py-4 px-2 text-right ${totalDiff > 0 ? 'text-red-600' : 'text-green-600'}`}>
@@ -67,7 +67,7 @@ export const SummaryView: React.FC<Props> = ({ steps, completedSteps, onReset })
                     onClick={onReset}
                     className="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors"
                 >
-                    Start New Session
+                    新しいセッションを開始
                 </button>
             </div>
         </div>

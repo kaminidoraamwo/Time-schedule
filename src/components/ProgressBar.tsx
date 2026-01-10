@@ -21,8 +21,8 @@ export const ProgressBar: React.FC<Props> = ({ steps, totalElapsedSeconds }) => 
     return (
         <div className="w-full mb-8">
             <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>Start</span>
-                <span>{Math.floor(totalDurationMinutes / 60)}h {totalDurationMinutes % 60}m</span>
+                <span>開始</span>
+                <span>{Math.floor(totalDurationMinutes / 60)}時間 {totalDurationMinutes % 60}分</span>
             </div>
 
             <div className="relative h-12 bg-gray-200 rounded-full overflow-hidden flex">

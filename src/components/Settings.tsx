@@ -45,21 +45,21 @@ export const Settings: React.FC<Props> = ({
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                    <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">設定</h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6">
                     {/* Presets Section */}
                     <div className="mb-8 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <h3 className="text-lg font-bold text-blue-800 mb-3">Presets</h3>
+                        <h3 className="text-lg font-bold text-blue-800 mb-3">プリセット</h3>
 
                         <div className="flex gap-2 mb-4">
                             <input
                                 type="text"
                                 value={newPresetName}
                                 onChange={(e) => setNewPresetName(e.target.value)}
-                                placeholder="New preset name..."
+                                placeholder="新しいプリセット名..."
                                 className="flex-1 px-3 py-2 border border-blue-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <button
@@ -67,7 +67,7 @@ export const Settings: React.FC<Props> = ({
                                 disabled={!newPresetName.trim()}
                                 className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-bold py-2 px-4 rounded shadow"
                             >
-                                Save Current
+                                保存
                             </button>
                         </div>
 
@@ -81,13 +81,13 @@ export const Settings: React.FC<Props> = ({
                                                 onClick={() => onLoadPreset(preset.id)}
                                                 className="text-sm bg-green-100 hover:bg-green-200 text-green-800 py-1 px-3 rounded"
                                             >
-                                                Load
+                                                読込
                                             </button>
                                             <button
                                                 onClick={() => onDeletePreset(preset.id)}
                                                 className="text-sm bg-red-100 hover:bg-red-200 text-red-800 py-1 px-3 rounded"
                                             >
-                                                Delete
+                                                削除
                                             </button>
                                         </div>
                                     </div>
@@ -96,7 +96,7 @@ export const Settings: React.FC<Props> = ({
                         )}
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">Edit Schedule</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">スケジュール編集</h3>
                     <div className="space-y-4">
                         {steps.map((step, index) => (
                             <div key={step.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
@@ -118,7 +118,7 @@ export const Settings: React.FC<Props> = ({
                                 </div>
 
                                 <div className="flex-1">
-                                    <label className="block text-xs text-gray-500 mb-1">Step Name</label>
+                                    <label className="block text-xs text-gray-500 mb-1">工程名</label>
                                     <input
                                         type="text"
                                         value={step.name}
@@ -128,7 +128,7 @@ export const Settings: React.FC<Props> = ({
                                 </div>
 
                                 <div className="w-24">
-                                    <label className="block text-xs text-gray-500 mb-1">Minutes</label>
+                                    <label className="block text-xs text-gray-500 mb-1">分</label>
                                     <input
                                         type="number"
                                         value={step.durationMinutes}
@@ -152,7 +152,7 @@ export const Settings: React.FC<Props> = ({
                         onClick={onAddStep}
                         className="mt-6 w-full py-3 border-2 border-dashed border-gray-300 text-gray-500 rounded-lg hover:border-blue-500 hover:text-blue-500 transition-colors font-bold"
                     >
-                        + Add Step
+                        + ステップを追加
                     </button>
                 </div>
 
@@ -161,13 +161,13 @@ export const Settings: React.FC<Props> = ({
                         onClick={onResetToDefault}
                         className="text-red-600 hover:text-red-800 text-sm font-medium underline"
                     >
-                        Reset to Default
+                        デフォルトに戻す
                     </button>
                     <button
                         onClick={onClose}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow"
                     >
-                        Done
+                        完了
                     </button>
                 </div>
             </div>

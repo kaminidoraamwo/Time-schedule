@@ -39,7 +39,7 @@ export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, 
 
     return (
         <div className={`flex flex-col items-center justify-center p-8 rounded-3xl shadow-lg ${bgColor} transition-colors duration-500`}>
-            <div className="text-gray-500 text-lg mb-2">Current Step</div>
+            <div className="text-gray-500 text-lg mb-2">現在の工程</div>
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">{step.name}</h2>
 
             <div className="text-8xl font-mono font-bold text-gray-900 mb-2 tracking-tighter">
@@ -62,14 +62,14 @@ export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, 
                     disabled={isFirstStep}
                     className="bg-gray-200 hover:bg-gray-300 disabled:opacity-30 text-gray-700 text-xl font-bold py-6 px-6 rounded-2xl shadow-md active:transform active:scale-95 transition-all"
                 >
-                    Back
+                    戻る
                 </button>
 
                 <button
                     onClick={onNext}
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold py-6 px-8 rounded-2xl shadow-md active:transform active:scale-95 transition-all"
                 >
-                    {isLastStep ? 'Finish' : 'Next Step'}
+                    {isLastStep ? '終了' : '次へ'}
                 </button>
             </div>
         </div>
