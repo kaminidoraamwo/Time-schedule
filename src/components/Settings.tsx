@@ -169,6 +169,19 @@ export const Settings: React.FC<Props> = ({
                     >
                         + ステップを追加
                     </button>
+
+                    {/* Total Duration Display (Bottom) */}
+                    <div className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600 font-medium">合計時間</span>
+                            <span className="text-2xl font-bold text-gray-800">
+                                {Math.floor(steps.reduce((acc, s) => acc + s.durationMinutes, 0) / 60)}時間 {steps.reduce((acc, s) => acc + s.durationMinutes, 0) % 60}分
+                            </span>
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">
+                            {steps.length} 工程
+                        </div>
+                    </div>
                 </div>
 
                 <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between items-center">
