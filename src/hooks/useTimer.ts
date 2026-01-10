@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Step } from '../constants';
+import { useSound } from './useSound';
 
 export type StepRecord = {
     stepId: number;
@@ -33,6 +34,10 @@ export const useTimer = (steps: Step[]) => {
         return saved ? JSON.parse(saved) : INITIAL_STATE;
     });
 
+    const { playChime, playFinish, initAudio, isMuted, toggleMute } = useSound();
+    const [hasPlayedChime, setHasPlayedChime] = useState(false);
+    const [hasPlayedFinish, setHasPlayedFinish] = useState(false);
+
     const [now, setNow] = useState(Date.now());
 
     useEffect(() => {
@@ -50,6 +55,7 @@ export const useTimer = (steps: Step[]) => {
     }, [state.isActive]);
 
     const start = useCallback(() => {
+        initAudio();
         const currentTime = Date.now();
         setState(prev => {
             if (prev.isActive) return prev;
@@ -80,6 +86,14 @@ export const useTimer = (steps: Step[]) => {
 
             const nextIndex = prev.currentStepIndex + 1;
             const isFinished = nextIndex >= steps.length;
+
+            // Reset sound flags for next step
+            setHasPlayedChime(false);
+            setHasPlayedFinish(false);
+
+            // Reset sound flags for next step
+            setHasPlayedChime(false);
+            setHasPlayedFinish(false);
 
             return {
                 ...prev,
@@ -119,15 +133,65 @@ export const useTimer = (steps: Step[]) => {
     const totalElapsedSeconds = state.startTime ? Math.floor((now - state.startTime) / 1000) : 0;
     const stepElapsedSeconds = state.stepStartTime ? Math.floor((now - state.stepStartTime) / 1000) : 0;
 
+    // Sound Logic
+    useEffect(() => {
+        if (!state.isActive || !currentStep) return;
+
+        const durationSeconds = currentStep.durationMinutes * 60;
+
+        // 80% Warning Chime
+        if (!hasPlayedChime && stepElapsedSeconds >= durationSeconds * 0.8 && stepElapsedSeconds < durationSeconds) {
+            playChime();
+            setHasPlayedChime(true);
+        }
+
+        // 100% Finish Sound
+        if (!hasPlayedFinish && stepElapsedSeconds >= durationSeconds) {
+            playFinish();
+            setHasPlayedFinish(true);
+        }
+    }, [state.isActive, currentStep, stepElapsedSeconds, hasPlayedChime, hasPlayedFinish, playChime, playFinish]);
+
+
+
+    // Notification Logic
+    useEffect(() => {
+        if (!hasPlayedFinish && stepElapsedSeconds >= (currentStep?.durationMinutes || 0) * 60) {
+            if (Notification.permission === 'granted') {
+                new Notification('工程終了', {
+                    body: `${currentStep?.name} が終了しました。次の工程へ進んでください。`,
+                    icon: '/pwa-192x192.png'
+                });
+            }
+        }
+    }, [hasPlayedFinish, stepElapsedSeconds, currentStep]);
+
+    const requestNotificationPermission = useCallback(() => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }, []);
+
+    // Request permission on start
+    const startWithPermission = useCallback(() => {
+        requestNotificationPermission();
+        start();
+    }, [start, requestNotificationPermission]);
+
     return {
         state,
         currentStep,
         totalElapsedSeconds,
         stepElapsedSeconds,
-        start,
+
+        start: startWithPermission,
         nextStep,
         previousStep,
         reset,
         isFinished: state.currentStepIndex >= steps.length,
+        isMuted,
+        toggleMute,
+        requestNotificationPermission,
     };
 };
+

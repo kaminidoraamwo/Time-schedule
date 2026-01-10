@@ -31,7 +31,10 @@ function App() {
     nextStep,
     previousStep,
     reset,
-    isFinished
+    isFinished,
+    isMuted,
+    toggleMute,
+    requestNotificationPermission
   } = useTimer(steps);
 
   const isNotStarted = !state.isActive && state.currentStepIndex === 0;
@@ -41,12 +44,21 @@ function App() {
     <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
       <header className="bg-white shadow-sm py-4 px-6 mb-6 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-700">Salon Pacer</h1>
-        <button
-          onClick={() => setIsSettingsOpen(true)}
-          className="text-gray-500 hover:text-blue-600"
-        >
-          ⚙️ 設定
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={toggleMute}
+            className="text-2xl hover:scale-110 transition-transform"
+            title={isMuted ? "ミュート解除" : "ミュート"}
+          >
+            {isMuted ? "🔇" : "🔊"}
+          </button>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="text-gray-500 hover:text-blue-600"
+          >
+            ⚙️ 設定
+          </button>
+        </div>
       </header>
 
       <Settings
@@ -62,6 +74,7 @@ function App() {
         onSavePreset={savePreset}
         onLoadPreset={loadPreset}
         onDeletePreset={deletePreset}
+        onRequestNotificationPermission={requestNotificationPermission}
       />
 
       <main className="container mx-auto px-4 max-w-3xl">

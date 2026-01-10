@@ -15,6 +15,7 @@ type Props = {
     onSavePreset: (name: string) => void;
     onLoadPreset: (id: string) => void;
     onDeletePreset: (id: string) => void;
+    onRequestNotificationPermission: () => void;
 };
 
 export const Settings: React.FC<Props> = ({
@@ -30,6 +31,7 @@ export const Settings: React.FC<Props> = ({
     onSavePreset,
     onLoadPreset,
     onDeletePreset,
+    onRequestNotificationPermission,
 }) => {
     const [newPresetName, setNewPresetName] = useState('');
 
@@ -156,13 +158,21 @@ export const Settings: React.FC<Props> = ({
                     </button>
                 </div>
 
-                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between">
-                    <button
-                        onClick={onResetToDefault}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium underline"
-                    >
-                        デフォルトに戻す
-                    </button>
+                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between items-center">
+                    <div className="flex gap-4">
+                        <button
+                            onClick={onResetToDefault}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                        >
+                            デフォルトに戻す
+                        </button>
+                        <button
+                            onClick={onRequestNotificationPermission}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                        >
+                            🔔 通知を許可
+                        </button>
+                    </div>
                     <button
                         onClick={onClose}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow"
