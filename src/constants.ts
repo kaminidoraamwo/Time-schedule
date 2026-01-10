@@ -1,0 +1,21 @@
+export type Step = {
+    id: number;
+    name: string;
+    durationMinutes: number;
+};
+
+export const SCHEDULE_STEPS: Step[] = [
+    { id: 1, name: 'カウンセリング', durationMinutes: 20 },
+    { id: 2, name: 'シャンプー', durationMinutes: 10 },
+    { id: 3, name: '準備・薬剤塗布', durationMinutes: 20 },
+    { id: 4, name: '薬剤放置', durationMinutes: 30 },
+    { id: 5, name: 'シャンプー・中間処理', durationMinutes: 15 },
+    { id: 6, name: 'ドライヤー', durationMinutes: 10 },
+    { id: 7, name: 'アイロンチェック', durationMinutes: 10 },
+    { id: 8, name: 'アイロン', durationMinutes: 40 },
+    { id: 9, name: '２液', durationMinutes: 15 },
+    { id: 10, name: 'シャンプー', durationMinutes: 10 },
+    { id: 11, name: 'ドライヤー・仕上げ・撮影', durationMinutes: 30 },
+];
+
+export const TOTAL_DURATION_MINUTES = SCHEDULE_STEPS.reduce((acc, step) => acc + step.durationMinutes, 0);
