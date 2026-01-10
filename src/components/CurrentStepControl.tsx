@@ -34,7 +34,6 @@ export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, 
         statusText = '注意';
     }
 
-    // const remainingSeconds = Math.max(0, plannedSeconds - stepElapsedSeconds);
     const overtimeSeconds = Math.max(0, stepElapsedSeconds - plannedSeconds);
 
     return (

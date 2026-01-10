@@ -106,7 +106,6 @@ function App() {
                 <CurrentStepControl
                   step={currentStep}
                   stepElapsedSeconds={stepElapsedSeconds}
-
                   onNext={nextStep}
                   onBack={previousStep}
                   isLastStep={state.currentStepIndex === steps.length - 1}

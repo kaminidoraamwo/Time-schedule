@@ -37,6 +37,7 @@ export const useTimer = (steps: Step[]) => {
     const { playChime, playFinish, initAudio, isMuted, toggleMute } = useSound();
     const [hasPlayedChime, setHasPlayedChime] = useState(false);
     const [hasPlayedFinish, setHasPlayedFinish] = useState(false);
+    const [hasNotified, setHasNotified] = useState(false);
 
     const [now, setNow] = useState(Date.now());
 
@@ -70,7 +71,7 @@ export const useTimer = (steps: Step[]) => {
                 stepStartTime: prev.stepStartTime ?? currentTime,
             };
         });
-    }, []);
+    }, [initAudio]);
 
     const nextStep = useCallback(() => {
         const currentTime = Date.now();
@@ -91,9 +92,10 @@ export const useTimer = (steps: Step[]) => {
             const nextIndex = prev.currentStepIndex + 1;
             const isFinished = nextIndex >= steps.length;
 
-            // Reset sound flags for next step
+            // Reset sound and notification flags for next step
             setHasPlayedChime(false);
             setHasPlayedFinish(false);
+            setHasNotified(false);
 
             return {
                 ...prev,
@@ -151,20 +153,18 @@ export const useTimer = (steps: Step[]) => {
             setHasPlayedFinish(true);
         }
     }, [state.isActive, currentStep, stepElapsedSeconds, hasPlayedChime, hasPlayedFinish, playChime, playFinish]);
-
-
-
     // Notification Logic
     useEffect(() => {
-        if (!hasPlayedFinish && stepElapsedSeconds >= (currentStep?.durationMinutes || 0) * 60) {
+        if (!hasNotified && stepElapsedSeconds >= (currentStep?.durationMinutes || 0) * 60) {
             if (Notification.permission === 'granted') {
                 new Notification('工程終了', {
                     body: `${currentStep?.name} が終了しました。次の工程へ進んでください。`,
                     icon: '/pwa-192x192.png'
                 });
+                setHasNotified(true);
             }
         }
-    }, [hasPlayedFinish, stepElapsedSeconds, currentStep]);
+    }, [hasNotified, stepElapsedSeconds, currentStep]);
 
     const requestNotificationPermission = useCallback(() => {
         if ('Notification' in window && Notification.permission === 'default') {
@@ -194,4 +194,3 @@ export const useTimer = (steps: Step[]) => {
         requestNotificationPermission,
     };
 };
-

@@ -43,8 +43,6 @@ export const useSound = () => {
         // "Pirorin" sound (High, bright sequence)
         if (isMuted || !audioContextRef.current) return;
 
-
-
         // First note
         setTimeout(() => playTone(880, 'sine', 0.1, 0.1), 0); // A5
         // Second note

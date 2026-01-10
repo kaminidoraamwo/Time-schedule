@@ -18,5 +18,3 @@ export const SCHEDULE_STEPS: Step[] = [
   { id: 11, name: 'シャンプー', durationMinutes: 10 },
   { id: 12, name: 'ドライヤー・仕上げ・撮影', durationMinutes: 30 },
 ];
-
-export const TOTAL_DURATION_MINUTES = SCHEDULE_STEPS.reduce((acc, step) => acc + step.durationMinutes, 0);
