@@ -5,7 +5,9 @@ type Props = {
     step: Step;
     stepElapsedSeconds: number;
     onNext: () => void;
+    onBack: () => void;
     isLastStep: boolean;
+    isFirstStep: boolean;
 };
 
 const formatTime = (seconds: number) => {
@@ -14,7 +16,7 @@ const formatTime = (seconds: number) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, onNext, isLastStep }) => {
+export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, onNext, onBack, isLastStep, isFirstStep }) => {
     const plannedSeconds = step.durationMinutes * 60;
     const progressRatio = stepElapsedSeconds / plannedSeconds;
 
@@ -54,12 +56,22 @@ export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, 
                 )}
             </div>
 
-            <button
-                onClick={onNext}
-                className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold py-6 px-8 rounded-2xl shadow-md active:transform active:scale-95 transition-all"
-            >
-                {isLastStep ? 'Finish' : 'Next Step'}
-            </button>
+            <div className="flex gap-4 w-full max-w-md justify-center">
+                <button
+                    onClick={onBack}
+                    disabled={isFirstStep}
+                    className="bg-gray-200 hover:bg-gray-300 disabled:opacity-30 text-gray-700 text-xl font-bold py-6 px-6 rounded-2xl shadow-md active:transform active:scale-95 transition-all"
+                >
+                    Back
+                </button>
+
+                <button
+                    onClick={onNext}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold py-6 px-8 rounded-2xl shadow-md active:transform active:scale-95 transition-all"
+                >
+                    {isLastStep ? 'Finish' : 'Next Step'}
+                </button>
+            </div>
         </div>
     );
 };

@@ -91,6 +91,23 @@ export const useTimer = (steps: Step[]) => {
         });
     }, [steps]);
 
+    const previousStep = useCallback(() => {
+        setState(prev => {
+            if (prev.currentStepIndex <= 0) return prev;
+
+            const newCompletedSteps = [...prev.completedSteps];
+            const lastCompletedStep = newCompletedSteps.pop();
+
+            return {
+                ...prev,
+                isActive: true,
+                currentStepIndex: prev.currentStepIndex - 1,
+                stepStartTime: lastCompletedStep ? lastCompletedStep.startTime : prev.stepStartTime,
+                completedSteps: newCompletedSteps,
+            };
+        });
+    }, []);
+
     const reset = useCallback(() => {
         setState(INITIAL_STATE);
         localStorage.removeItem(STORAGE_KEY);
@@ -109,6 +126,7 @@ export const useTimer = (steps: Step[]) => {
         stepElapsedSeconds,
         start,
         nextStep,
+        previousStep,
         reset,
         isFinished: state.currentStepIndex >= steps.length,
     };

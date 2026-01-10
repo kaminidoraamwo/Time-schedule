@@ -29,6 +29,7 @@ function App() {
     stepElapsedSeconds,
     start,
     nextStep,
+    previousStep,
     reset,
     isFinished
   } = useTimer(steps);
@@ -92,8 +93,11 @@ function App() {
                 <CurrentStepControl
                   step={currentStep}
                   stepElapsedSeconds={stepElapsedSeconds}
+
                   onNext={nextStep}
+                  onBack={previousStep}
                   isLastStep={state.currentStepIndex === steps.length - 1}
+                  isFirstStep={state.currentStepIndex === 0}
                 />
               )}
             </div>
