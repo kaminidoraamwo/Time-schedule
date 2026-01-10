@@ -1,8 +1,9 @@
 import React from 'react';
 import type { StepRecord } from '../hooks/useTimer';
-import { SCHEDULE_STEPS } from '../constants';
+import type { Step } from '../constants';
 
 type Props = {
+    steps: Step[];
     completedSteps: StepRecord[];
     onReset: () => void;
 };
@@ -13,7 +14,7 @@ const formatTime = (seconds: number) => {
     return `${m}m ${s}s`;
 };
 
-export const SummaryView: React.FC<Props> = ({ completedSteps, onReset }) => {
+export const SummaryView: React.FC<Props> = ({ steps, completedSteps, onReset }) => {
     const totalPlanned = completedSteps.reduce((acc, s) => acc + s.plannedDuration, 0);
     const totalActual = completedSteps.reduce((acc, s) => acc + s.actualDuration, 0);
     const totalDiff = totalActual - totalPlanned;
@@ -34,13 +35,13 @@ export const SummaryView: React.FC<Props> = ({ completedSteps, onReset }) => {
                     </thead>
                     <tbody>
                         {completedSteps.map((record, index) => {
-                            const step = SCHEDULE_STEPS.find(s => s.id === record.stepId);
+                            const step = steps.find(s => s.id === record.stepId);
                             const diff = record.actualDuration - record.plannedDuration;
                             const isLate = diff > 0;
 
                             return (
                                 <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                                    <td className="py-3 px-2 text-sm font-medium text-gray-700">{step?.name}</td>
+                                    <td className="py-3 px-2 text-sm font-medium text-gray-700">{step?.name || `Step ${record.stepId}`}</td>
                                     <td className="py-3 px-2 text-right text-sm text-gray-500">{formatTime(record.plannedDuration)}</td>
                                     <td className="py-3 px-2 text-right text-sm font-mono">{formatTime(record.actualDuration)}</td>
                                     <td className={`py-3 px-2 text-right text-sm font-bold ${isLate ? 'text-red-500' : 'text-green-500'}`}>

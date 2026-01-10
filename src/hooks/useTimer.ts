@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SCHEDULE_STEPS } from '../constants';
+import type { Step } from '../constants';
 
 export type StepRecord = {
     stepId: number;
@@ -27,7 +27,7 @@ const INITIAL_STATE: TimerState = {
     completedSteps: [],
 };
 
-export const useTimer = () => {
+export const useTimer = (steps: Step[]) => {
     const [state, setState] = useState<TimerState>(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         return saved ? JSON.parse(saved) : INITIAL_STATE;
@@ -65,9 +65,9 @@ export const useTimer = () => {
     const nextStep = useCallback(() => {
         const currentTime = Date.now();
         setState(prev => {
-            if (!prev.isActive || prev.currentStepIndex >= SCHEDULE_STEPS.length) return prev;
+            if (!prev.isActive || prev.currentStepIndex >= steps.length) return prev;
 
-            const currentStep = SCHEDULE_STEPS[prev.currentStepIndex];
+            const currentStep = steps[prev.currentStepIndex];
             const stepDurationSeconds = Math.floor((currentTime - (prev.stepStartTime || currentTime)) / 1000);
 
             const newRecord: StepRecord = {
@@ -79,7 +79,7 @@ export const useTimer = () => {
             };
 
             const nextIndex = prev.currentStepIndex + 1;
-            const isFinished = nextIndex >= SCHEDULE_STEPS.length;
+            const isFinished = nextIndex >= steps.length;
 
             return {
                 ...prev,
@@ -89,14 +89,14 @@ export const useTimer = () => {
                 completedSteps: [...prev.completedSteps, newRecord],
             };
         });
-    }, []);
+    }, [steps]);
 
     const reset = useCallback(() => {
         setState(INITIAL_STATE);
         localStorage.removeItem(STORAGE_KEY);
     }, []);
 
-    const currentStep = SCHEDULE_STEPS[state.currentStepIndex];
+    const currentStep = steps[state.currentStepIndex];
 
     // Calculate elapsed times
     const totalElapsedSeconds = state.startTime ? Math.floor((now - state.startTime) / 1000) : 0;
@@ -110,6 +110,6 @@ export const useTimer = () => {
         start,
         nextStep,
         reset,
-        isFinished: state.currentStepIndex >= SCHEDULE_STEPS.length,
+        isFinished: state.currentStepIndex >= steps.length,
     };
 };

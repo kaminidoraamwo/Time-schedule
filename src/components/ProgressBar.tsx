@@ -1,31 +1,33 @@
 import React from 'react';
-import { SCHEDULE_STEPS, TOTAL_DURATION_MINUTES } from '../constants';
+import type { Step } from '../constants';
 
 type Props = {
+    steps: Step[];
     totalElapsedSeconds: number;
-    currentStepIndex: number;
 };
 
-export const ProgressBar: React.FC<Props> = ({ totalElapsedSeconds }) => {
-    const totalDurationSeconds = TOTAL_DURATION_MINUTES * 60;
+export const ProgressBar: React.FC<Props> = ({ steps, totalElapsedSeconds }) => {
+    const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
+    const totalDurationSeconds = totalDurationMinutes * 60;
 
     // Calculate width of each step in %
-    const stepWidths = SCHEDULE_STEPS.map(s => (s.durationMinutes * 60 / totalDurationSeconds) * 100);
+    const stepWidths = steps.map(s => (s.durationMinutes * 60 / totalDurationSeconds) * 100);
 
     // Calculate current progress in %
-    // Cap at 100% for display, or let it overflow if needed. Let's cap for now or show overflow indicator.
-    const progressPercent = Math.min((totalElapsedSeconds / totalDurationSeconds) * 100, 100);
+    const progressPercent = totalDurationSeconds > 0
+        ? Math.min((totalElapsedSeconds / totalDurationSeconds) * 100, 100)
+        : 0;
 
     return (
         <div className="w-full mb-8">
             <div className="flex justify-between text-xs text-gray-500 mb-1">
                 <span>Start</span>
-                <span>{Math.floor(TOTAL_DURATION_MINUTES / 60)}h {TOTAL_DURATION_MINUTES % 60}m</span>
+                <span>{Math.floor(totalDurationMinutes / 60)}h {totalDurationMinutes % 60}m</span>
             </div>
 
             <div className="relative h-12 bg-gray-200 rounded-full overflow-hidden flex">
                 {/* Background Segments */}
-                {SCHEDULE_STEPS.map((step, index) => (
+                {steps.map((step, index) => (
                     <div
                         key={step.id}
                         style={{ width: `${stepWidths[index]}%` }}
@@ -48,8 +50,6 @@ export const ProgressBar: React.FC<Props> = ({ totalElapsedSeconds }) => {
                     style={{ left: `${progressPercent}%` }}
                 />
             </div>
-
-            {/* Step Markers Labels (optional, maybe too crowded) */}
         </div>
     );
 };
