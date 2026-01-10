@@ -159,7 +159,7 @@ export const useTimer = (steps: Step[]) => {
             if (Notification.permission === 'granted') {
                 new Notification('工程終了', {
                     body: `${currentStep?.name} が終了しました。次の工程へ進んでください。`,
-                    icon: '/pwa-192x192.png'
+                    icon: './pwa-192x192.png'
                 });
                 setHasNotified(true);
             }

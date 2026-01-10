@@ -2,6 +2,7 @@
   "name": "pulsing-voyager",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://kaminidoraamwo.github.io/Time-schedule/",
   "type": "module",
   "scripts": {
     "dev": "vite",
