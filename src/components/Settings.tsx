@@ -65,6 +65,10 @@ export const Settings: React.FC<Props> = ({
         setNewPresetName('');
     };
 
+    const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
+    const totalHours = Math.floor(totalDurationMinutes / 60);
+    const totalMinutes = totalDurationMinutes % 60;
+
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
@@ -125,7 +129,7 @@ export const Settings: React.FC<Props> = ({
                         <div className="flex justify-between items-center">
                             <span className="text-gray-600 font-medium">合計時間</span>
                             <span className="text-2xl font-bold text-gray-800">
-                                {Math.floor(steps.reduce((acc, s) => acc + s.durationMinutes, 0) / 60)}時間 {steps.reduce((acc, s) => acc + s.durationMinutes, 0) % 60}分
+                                {totalHours}時間 {totalMinutes}分
                             </span>
                         </div>
                         <div className="text-sm text-gray-500 mt-1">
@@ -197,7 +201,7 @@ export const Settings: React.FC<Props> = ({
                         <div className="flex justify-between items-center">
                             <span className="text-gray-600 font-medium">合計時間</span>
                             <span className="text-2xl font-bold text-gray-800">
-                                {Math.floor(steps.reduce((acc, s) => acc + s.durationMinutes, 0) / 60)}時間 {steps.reduce((acc, s) => acc + s.durationMinutes, 0) % 60}分
+                                {totalHours}時間 {totalMinutes}分
                             </span>
                         </div>
                         <div className="text-sm text-gray-500 mt-1">
