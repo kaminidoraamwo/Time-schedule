@@ -6,7 +6,7 @@ import './index.css'
 import App from './App.tsx'
 
 // Register Service Worker
-const updateSW = registerSW({
+registerSW({
   onNeedRefresh() {
     console.log('New content available, verify to update.')
   },

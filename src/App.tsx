@@ -65,6 +65,15 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  const handleTestNotification = async () => {
+    if (!fcmToken) {
+      alert('FCMトークンがありません');
+      return;
+    }
+    await sendPushNotification('サーバーからのテスト通知', 'これが届けば自動通知も成功します！');
+    alert('サーバーに送信依頼を出しました！通知を待ってみてください。');
+  };
+
   const isNotStarted = !state.isActive && state.currentStepIndex === 0;
   const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
 
@@ -103,6 +112,10 @@ function App() {
         onLoadPreset={loadPreset}
         onDeletePreset={deletePreset}
         onRequestNotificationPermission={requestNotificationPermission}
+        fcmToken={fcmToken}
+        permissionStatus={permissionStatus}
+        onRequestToken={requestToken}
+        onTestNotification={handleTestNotification}
       />
 
       <main className="container mx-auto px-4 max-w-3xl">
