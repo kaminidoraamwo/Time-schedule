@@ -29,13 +29,13 @@ const messaging = getMessaging(app);
 onBackgroundMessage(messaging, (payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
     // Custom notification logic if needed, but SDK handles basic display automatically
-    const notificationTitle = payload.notification?.title || 'Notification';
-    const notificationOptions = {
-        body: payload.notification?.body,
-        icon: '/pwa-192x192.png'
-    };
-
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    // Removing manual showNotification to prevent double notifications (SDK + Manual)
+    // const notificationTitle = payload.notification?.title || 'Notification';
+    // const notificationOptions = {
+    //     body: payload.notification?.body,
+    //     icon: '/pwa-192x192.png'
+    // };
+    // self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 console.log('Service Worker (with Firebase) is running!')

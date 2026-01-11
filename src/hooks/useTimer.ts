@@ -171,10 +171,17 @@ export const useTimer = (
 
         setState(prev => {
             if (prev.currentStepIndex <= 0) return prev;
+            const lastStep = prev.completedSteps[prev.completedSteps.length - 1];
+            // Restore start time: (Current Step Start Time) - (Previous Step Duration)
+            // This effectively merges the time spent in the current step into the previous step
+            const restoredStartTime = lastStep && prev.stepStartTime
+                ? prev.stepStartTime - (lastStep.actualDuration * 1000)
+                : Date.now();
+
             return {
                 ...prev,
                 currentStepIndex: prev.currentStepIndex - 1,
-                stepStartTime: Date.now(), // Restart step timer
+                stepStartTime: restoredStartTime,
                 completedSteps: prev.completedSteps.slice(0, -1),
                 notificationTaskName: null
             };
