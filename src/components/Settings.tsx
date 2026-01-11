@@ -4,7 +4,7 @@ import type { Preset } from '../hooks/useSettings';
 import { PresetManager } from './settings/PresetManager';
 import { ScheduleEditor } from './settings/ScheduleEditor';
 import { TotalDuration } from './settings/TotalDuration';
-import { NotificationDebugPanel } from './settings/NotificationDebugPanel';
+
 
 type Props = {
     steps: Step[];
@@ -20,12 +20,9 @@ type Props = {
     onLoadPreset: (id: string) => void;
     onDeletePreset: (id: string) => void;
     onRequestNotificationPermission: () => void;
+    permissionStatus: NotificationPermission;
 
     // New Props for Notification Integration
-    fcmToken: string;
-    permissionStatus: NotificationPermission;
-    onRequestToken: () => Promise<string | null>;
-    onTestNotification: () => Promise<void>;
 };
 
 export const Settings: React.FC<Props> = ({
@@ -42,10 +39,7 @@ export const Settings: React.FC<Props> = ({
     onLoadPreset,
     onDeletePreset,
     onRequestNotificationPermission,
-    fcmToken,
     permissionStatus,
-    onRequestToken,
-    onTestNotification
 }) => {
     if (!isOpen) return null;
 
@@ -99,12 +93,6 @@ export const Settings: React.FC<Props> = ({
                         </button>
                     </div>
                 </div>
-
-                <NotificationDebugPanel
-                    fcmToken={fcmToken}
-                    onRequestToken={onRequestToken}
-                    onTestNotification={onTestNotification}
-                />
 
                 <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
                     <button
