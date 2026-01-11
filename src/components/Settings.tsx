@@ -182,7 +182,7 @@ export const Settings: React.FC<Props> = ({
                                                         const newVal = Math.max(1, step.durationMinutes - 1);
                                                         onUpdateStep(step.id, 'durationMinutes', newVal);
                                                     }}
-                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-12 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
+                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-10 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
                                                 >
                                                     -
                                                 </button>
@@ -196,19 +196,19 @@ export const Settings: React.FC<Props> = ({
                                                             onUpdateStep(step.id, 'durationMinutes', Math.max(0, val));
                                                         }
                                                     }}
-                                                    className="w-16 h-10 border border-gray-300 rounded text-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                                                    className="w-14 h-10 border border-gray-300 rounded text-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                                                 />
 
                                                 <button
                                                     onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 1)}
-                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-12 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
+                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-10 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
                                                 >
                                                     +
                                                 </button>
 
                                                 <button
                                                     onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 5)}
-                                                    className="bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 w-12 h-10 rounded shadow-sm ml-1 flex items-center justify-center font-bold text-sm active:translate-y-0.5 transition-all"
+                                                    className="bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 w-10 h-10 rounded shadow-sm ml-1 flex items-center justify-center font-bold text-sm active:translate-y-0.5 transition-all"
                                                 >
                                                     +5
                                                 </button>
