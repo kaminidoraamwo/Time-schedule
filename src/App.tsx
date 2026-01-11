@@ -113,6 +113,7 @@ function App() {
                     onBack={previousStep}
                     isLastStep={state.currentStepIndex === steps.length - 1}
                     isFirstStep={state.currentStepIndex === 0}
+                    nextStep={steps[state.currentStepIndex + 1]}
                   />
 
                   <div className="flex flex-col items-center p-4 bg-white/50 rounded-xl">

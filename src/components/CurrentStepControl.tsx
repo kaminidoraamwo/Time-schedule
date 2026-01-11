@@ -8,6 +8,7 @@ type Props = {
     onBack: () => void;
     isLastStep: boolean;
     isFirstStep: boolean;
+    nextStep?: Step;
 };
 
 const formatTime = (seconds: number) => {
@@ -16,7 +17,7 @@ const formatTime = (seconds: number) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, onNext, onBack, isLastStep, isFirstStep }) => {
+export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, onNext, onBack, isLastStep, isFirstStep, nextStep }) => {
     const plannedSeconds = step.durationMinutes * 60;
     const progressRatio = stepElapsedSeconds / plannedSeconds;
 
@@ -66,9 +67,14 @@ export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, 
 
                 <button
                     onClick={onNext}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold py-6 px-8 rounded-2xl shadow-md active:transform active:scale-95 transition-all"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl shadow-md active:transform active:scale-95 transition-all flex flex-col items-center justify-center gap-1"
                 >
-                    {isLastStep ? '終了' : '次へ'}
+                    <span className="text-2xl">{isLastStep ? '終了' : '次へ'}</span>
+                    {nextStep && (
+                        <span className="text-sm font-normal opacity-90">
+                            次は {nextStep.name} ({nextStep.durationMinutes}分)
+                        </span>
+                    )}
                 </button>
             </div>
         </div>
