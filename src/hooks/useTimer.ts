@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Step } from '../constants';
 import { useSound } from './useSound';
 
@@ -56,12 +56,13 @@ export const useTimer = (
         }
     });
 
-    const [now, setNow] = useState(Date.now());
+    const [now, setNow] = useState(() => Date.now());
     const { initAudio, playChime, playFinish, isMuted, toggleMute } = useSound();
 
     // Local flags to prevent repeated audio triggers in the same step
-    const [hasPlayedChime, setHasPlayedChime] = useState(false);
-    const [hasPlayedFinish, setHasPlayedFinish] = useState(false);
+    // Local flags to prevent repeated audio triggers in the same step
+    const hasPlayedChime = useRef(false);
+    const hasPlayedFinish = useRef(false);
 
     // Helper to calculate task delay
     const getTaskDelay = useCallback((step: Step) => {
@@ -150,8 +151,9 @@ export const useTimer = (
             };
 
             // Reset audio flags for new step
-            setHasPlayedChime(false);
-            setHasPlayedFinish(false);
+            // Reset audio flags for new step
+            hasPlayedChime.current = false;
+            hasPlayedFinish.current = false;
 
             return {
                 ...prev,
@@ -193,13 +195,14 @@ export const useTimer = (
             await cancelPushNotification(state.notificationTaskName);
         }
         setState(INITIAL_STATE);
-        setHasPlayedChime(false);
-        setHasPlayedFinish(false);
+        hasPlayedChime.current = false;
+        hasPlayedFinish.current = false;
     }, [state.notificationTaskName, cancelPushNotification]);
 
-    const skipToFinish = useCallback(async () => {
+    const skipToFinish = useCallback(() => {
         if (state.notificationTaskName && cancelPushNotification) {
-            await cancelPushNotification(state.notificationTaskName);
+            // Fire and forget cancellation to prevent UI blocking
+            cancelPushNotification(state.notificationTaskName).catch(console.error);
         }
         setState(prev => ({
             ...prev,
@@ -237,20 +240,21 @@ export const useTimer = (
 
         // 1. Chime (3 mins before)
         const chimeThreshold = 180; // 3 mins
-        if (durationSeconds > chimeThreshold && diff <= chimeThreshold && diff > 0 && !hasPlayedChime) {
+        if (durationSeconds > chimeThreshold && diff <= chimeThreshold && diff > 0 && !hasPlayedChime.current) {
             playChime();
-            setHasPlayedChime(true);
+            hasPlayedChime.current = true;
         }
 
         // 2. Finish
-        if (stepElapsedSeconds >= durationSeconds && !hasPlayedFinish) {
+        if (stepElapsedSeconds >= durationSeconds && !hasPlayedFinish.current) {
             playFinish();
-            setHasPlayedFinish(true);
+            hasPlayedFinish.current = true;
         }
-    }, [state.isActive, currentStep, stepElapsedSeconds, hasPlayedChime, hasPlayedFinish, playChime, playFinish]);
+    }, [state.isActive, currentStep, stepElapsedSeconds, playChime, playFinish]);
 
     return {
         state,
+        now, // Export now for synchronization
         currentStep,
         totalElapsedSeconds,
         stepElapsedSeconds,

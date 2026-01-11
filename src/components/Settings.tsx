@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Step } from '../constants';
 import type { Preset } from '../hooks/useSettings';
 import { PresetManager } from './settings/PresetManager';
@@ -41,6 +41,45 @@ export const Settings: React.FC<Props> = ({
     onRequestNotificationPermission,
     permissionStatus,
 }) => {
+    // Confirmation State
+    const [confirmState, setConfirmState] = useState<{
+        type: 'RESET' | 'LOAD' | 'DELETE';
+        presetId?: string;
+        presetName?: string;
+    } | null>(null);
+
+    // Handlers to trigger confirmation
+    const handleResetRequest = () => {
+        setConfirmState({ type: 'RESET' });
+    };
+
+    const handleLoadRequest = (id: string) => {
+        const preset = presets.find(p => p.id === id);
+        if (preset) {
+            setConfirmState({ type: 'LOAD', presetId: id, presetName: preset.name });
+        }
+    };
+
+    const handleDeleteRequest = (id: string) => {
+        const preset = presets.find(p => p.id === id);
+        if (preset) {
+            setConfirmState({ type: 'DELETE', presetId: id, presetName: preset.name });
+        }
+    };
+
+    const executeAction = () => {
+        if (!confirmState) return;
+
+        if (confirmState.type === 'RESET') {
+            onResetToDefault();
+        } else if (confirmState.type === 'LOAD' && confirmState.presetId) {
+            onLoadPreset(confirmState.presetId);
+        } else if (confirmState.type === 'DELETE' && confirmState.presetId) {
+            onDeletePreset(confirmState.presetId);
+        }
+        setConfirmState(null);
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -55,8 +94,8 @@ export const Settings: React.FC<Props> = ({
                     <PresetManager
                         presets={presets}
                         onSavePreset={onSavePreset}
-                        onLoadPreset={onLoadPreset}
-                        onDeletePreset={onDeletePreset}
+                        onLoadPreset={handleLoadRequest}
+                        onDeletePreset={handleDeleteRequest}
                     />
 
                     <TotalDuration steps={steps} />
@@ -78,7 +117,7 @@ export const Settings: React.FC<Props> = ({
                 <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between items-center">
                     <div className="flex gap-4">
                         <button
-                            onClick={onResetToDefault}
+                            onClick={handleResetRequest}
                             className="text-red-600 hover:text-red-800 text-sm font-medium underline"
                         >
                             デフォルトに戻す
@@ -103,6 +142,35 @@ export const Settings: React.FC<Props> = ({
                     </button>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {confirmState && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                    <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">確認</h3>
+                        <p className="text-gray-600 mb-6 whitespace-pre-line">
+                            {confirmState.type === 'RESET' && '設定を初期状態に戻しますか？'}
+                            {confirmState.type === 'LOAD' && `プリセット「${confirmState.presetName}」を読み込みますか？\n現在の設定は上書きされます。`}
+                            {confirmState.type === 'DELETE' && 'このプリセットを削除しますか？'}
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setConfirmState(null)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                キャンセル
+                            </button>
+                            <button
+                                onClick={executeAction}
+                                className={`px-4 py-2 text-white rounded-lg transition-colors shadow-sm ${confirmState.type === 'LOAD' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'
+                                    }`}
+                            >
+                                {confirmState.type === 'LOAD' ? '読み込む' : '実行する'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

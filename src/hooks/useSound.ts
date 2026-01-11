@@ -7,7 +7,7 @@ export const useSound = () => {
     // Initialize AudioContext on user interaction (required by browsers)
     const initAudio = useCallback(() => {
         if (!audioContextRef.current) {
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+            audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: new () => AudioContext }).webkitAudioContext)();
         }
         if (audioContextRef.current.state === 'suspended') {
             audioContextRef.current.resume();

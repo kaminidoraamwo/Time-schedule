@@ -38,7 +38,8 @@ export const useNotification = () => {
     // Initial check on mount
     useEffect(() => {
         if (Notification.permission === 'granted') {
-            requestToken();
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            void requestToken();
         }
     }, [requestToken]);
 
@@ -58,7 +59,7 @@ export const useNotification = () => {
         try {
             const scheduleFn = httpsCallable(functions, 'scheduleNotification');
             const result = await scheduleFn({ token: fcmToken, title, body, delaySeconds });
-            const data = result.data as any; // Type casting for simplicity
+            const data = result.data as { success: boolean; taskName?: string };
             if (data.success && data.taskName) {
                 console.log('Notification scheduled:', data.taskName);
                 return data.taskName;

@@ -71,9 +71,7 @@ export const useSettings = () => {
     }, []);
 
     const resetToDefault = useCallback(() => {
-        if (confirm('設定を初期状態に戻しますか？')) {
-            setSteps(SCHEDULE_STEPS);
-        }
+        setSteps(SCHEDULE_STEPS);
     }, []);
 
     const savePreset = useCallback((name: string) => {
@@ -88,16 +86,12 @@ export const useSettings = () => {
     const loadPreset = useCallback((presetId: string) => {
         const preset = presets.find(p => p.id === presetId);
         if (preset) {
-            if (confirm(`プリセット「${preset.name}」を読み込みますか？\n現在の設定は上書きされます。`)) {
-                setSteps(preset.steps);
-            }
+            setSteps(preset.steps);
         }
     }, [presets]);
 
     const deletePreset = useCallback((presetId: string) => {
-        if (confirm('このプリセットを削除しますか？')) {
-            setPresets(prev => prev.filter(p => p.id !== presetId));
-        }
+        setPresets(prev => prev.filter(p => p.id !== presetId));
     }, []);
 
     return {
