@@ -43,28 +43,48 @@ export const useNotification = () => {
     }, [requestToken]);
 
     const sendPushNotification = useCallback(async (title: string, body: string) => {
-        if (!fcmToken) {
-            console.warn('No FCM token available to send notification');
-            return;
-        }
-
+        if (!fcmToken) return;
         try {
             const sendFn = httpsCallable(functions, 'sendNotification');
-            await sendFn({
-                token: fcmToken,
-                title,
-                body
-            });
-            console.log('Push notification sent successfully');
+            await sendFn({ token: fcmToken, title, body });
+            console.log('Push notification sent');
         } catch (error) {
-            console.error('Error sending push notification:', error);
+            console.error('Error sending push:', error);
         }
     }, [fcmToken]);
+
+    const schedulePushNotification = useCallback(async (title: string, body: string, delaySeconds: number): Promise<string | null> => {
+        if (!fcmToken) return null;
+        try {
+            const scheduleFn = httpsCallable(functions, 'scheduleNotification');
+            const result = await scheduleFn({ token: fcmToken, title, body, delaySeconds });
+            const data = result.data as any; // Type casting for simplicity
+            if (data.success && data.taskName) {
+                console.log('Notification scheduled:', data.taskName);
+                return data.taskName;
+            }
+        } catch (error) {
+            console.error('Error scheduling push:', error);
+        }
+        return null;
+    }, [fcmToken]);
+
+    const cancelPushNotification = useCallback(async (taskName: string) => {
+        try {
+            const cancelFn = httpsCallable(functions, 'cancelNotification');
+            await cancelFn({ taskName });
+            console.log('Notification canceled:', taskName);
+        } catch (error) {
+            console.error('Error canceling push:', error);
+        }
+    }, []);
 
     return {
         fcmToken,
         permissionStatus,
         requestToken,
-        sendPushNotification
+        sendPushNotification,
+        schedulePushNotification,
+        cancelPushNotification
     };
 };

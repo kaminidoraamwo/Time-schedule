@@ -28,7 +28,9 @@ function App() {
 
   const {
     permissionStatus,
-    sendPushNotification
+
+    schedulePushNotification,
+    cancelPushNotification
   } = useNotification();
 
   const {
@@ -45,7 +47,7 @@ function App() {
     toggleMute,
     requestNotificationPermission,
     skipToFinish
-  } = useTimer(steps, sendPushNotification);
+  } = useTimer(steps, schedulePushNotification, cancelPushNotification);
 
   // Listen for foreground notifications
   useEffect(() => {

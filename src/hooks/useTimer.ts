@@ -4,18 +4,18 @@ import { useSound } from './useSound';
 
 export type StepRecord = {
     stepId: number;
-    plannedDuration: number;
-    actualDuration: number; // in seconds
-    startTime: number;
-    endTime: number;
+    plannedDuration: number; // Seconds
+    actualDuration: number; // Seconds
+    difference: number;
 };
 
 export type TimerState = {
     isActive: boolean;
-    startTime: number | null; // Global start time
+    startTime: number | null; // Session start time
     currentStepIndex: number;
     stepStartTime: number | null; // Current step start time
     completedSteps: StepRecord[];
+    notificationTaskName: string | null;
 };
 
 const STORAGE_KEY = 'salon-pacer-state';
@@ -26,48 +26,66 @@ const INITIAL_STATE: TimerState = {
     currentStepIndex: 0,
     stepStartTime: null,
     completedSteps: [],
+    notificationTaskName: null,
 };
 
-export const useTimer = (steps: Step[], sendPushNotification?: (title: string, body: string) => Promise<void>) => {
-
+export const useTimer = (
+    steps: Step[],
+    schedulePushNotification?: (title: string, body: string, delaySeconds: number) => Promise<string | null>,
+    cancelPushNotification?: (taskName: string) => Promise<void>
+) => {
     const [state, setState] = useState<TimerState>(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
             return saved ? JSON.parse(saved) : INITIAL_STATE;
-        } catch (error) {
-            console.error('Failed to parse timer state:', error);
+        } catch {
             return INITIAL_STATE;
         }
     });
 
-    const { playChime, playFinish, initAudio, isMuted, toggleMute } = useSound();
+    const [now, setNow] = useState(Date.now());
+    const { initAudio, playChime, playFinish, isMuted, toggleMute } = useSound();
+
+    // Local flags to prevent repeated audio triggers in the same step
     const [hasPlayedChime, setHasPlayedChime] = useState(false);
     const [hasPlayedFinish, setHasPlayedFinish] = useState(false);
-    const [hasNotified, setHasNotified] = useState(false);
 
-    const [now, setNow] = useState(Date.now());
+    // Helper to calculate task delay
+    const getTaskDelay = useCallback((step: Step) => {
+        return step.durationMinutes * 60;
+    }, []);
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [state]);
 
-    // Update 'now' every second when active, and also on initial load
     useEffect(() => {
-        // Immediately sync 'now' on mount to ensure real-time calculation
-        setNow(Date.now());
-
-        let interval: number;
-        if (state.isActive) {
-            interval = setInterval(() => {
-                setNow(Date.now());
-            }, 1000);
-        }
+        if (!state.isActive) return;
+        const interval = setInterval(() => {
+            setNow(Date.now());
+        }, 200); // Check every 200ms
         return () => clearInterval(interval);
     }, [state.isActive]);
 
-    const start = useCallback(() => {
+    const start = useCallback(async () => {
         initAudio();
         const currentTime = Date.now();
+
+        // Schedule notification for the first step
+        let taskName: string | null = null;
+        if (steps.length > 0 && schedulePushNotification) {
+            const step = steps[state.currentStepIndex];
+            if (step) {
+                const title = '工程終了';
+                const body = `${step.name} が終了しました。次の工程へ進んでください。`;
+                try {
+                    taskName = await schedulePushNotification(title, body, getTaskDelay(step));
+                } catch (e) {
+                    console.error('Failed to schedule start task', e);
+                }
+            }
+        }
+
         setState(prev => {
             if (prev.isActive) return prev;
             return {
@@ -75,185 +93,155 @@ export const useTimer = (steps: Step[], sendPushNotification?: (title: string, b
                 isActive: true,
                 startTime: prev.startTime ?? currentTime,
                 stepStartTime: prev.stepStartTime ?? currentTime,
+                notificationTaskName: taskName
             };
         });
-    }, [initAudio]);
+    }, [initAudio, steps, state.currentStepIndex, schedulePushNotification, getTaskDelay]);
 
-    const nextStep = useCallback(() => {
+    const nextStep = useCallback(async () => {
         const currentTime = Date.now();
+
+        // Cancel previous task
+        if (state.notificationTaskName && cancelPushNotification) {
+            await cancelPushNotification(state.notificationTaskName);
+        }
+
+        // Determine next step
+        const nextIndex = state.currentStepIndex + 1;
+
+        // Schedule next task if available
+        let newTaskName: string | null = null;
+        if (nextIndex < steps.length && schedulePushNotification) {
+            const step = steps[nextIndex];
+            const title = '工程終了';
+            const body = `${step.name} が終了しました。次の工程へ進んでください。`;
+            try {
+                newTaskName = await schedulePushNotification(title, body, getTaskDelay(step));
+            } catch (e) {
+                console.error('Failed to schedule next task', e);
+            }
+        }
+
         setState(prev => {
             if (!prev.isActive || prev.currentStepIndex >= steps.length) return prev;
 
+            const actualDuration = (currentTime - (prev.stepStartTime || currentTime)) / 1000;
             const currentStep = steps[prev.currentStepIndex];
-            const stepDurationSeconds = Math.floor((currentTime - (prev.stepStartTime || currentTime)) / 1000);
+            const plannedDuration = currentStep ? currentStep.durationMinutes * 60 : 0;
 
             const newRecord: StepRecord = {
-                stepId: currentStep.id,
-                plannedDuration: currentStep.durationMinutes * 60,
-                actualDuration: stepDurationSeconds,
-                startTime: prev.stepStartTime || currentTime,
-                endTime: currentTime,
+                stepId: currentStep ? currentStep.id : -1,
+                plannedDuration: plannedDuration,
+                actualDuration: actualDuration,
+                difference: actualDuration - plannedDuration,
             };
 
-            const nextIndex = prev.currentStepIndex + 1;
-            const isFinished = nextIndex >= steps.length;
-
-            // Reset sound and notification flags for next step
+            // Reset audio flags for new step
             setHasPlayedChime(false);
             setHasPlayedFinish(false);
-            setHasNotified(false);
 
             return {
                 ...prev,
-                isActive: !isFinished,
                 currentStepIndex: nextIndex,
-                stepStartTime: isFinished ? null : currentTime,
+                stepStartTime: currentTime,
                 completedSteps: [...prev.completedSteps, newRecord],
+                notificationTaskName: newTaskName
             };
         });
-    }, [steps]);
+    }, [steps, state.notificationTaskName, state.currentStepIndex, cancelPushNotification, schedulePushNotification, getTaskDelay]);
 
-    const previousStep = useCallback(() => {
+    const previousStep = useCallback(async () => {
+        // Cancel current task
+        if (state.notificationTaskName && cancelPushNotification) {
+            await cancelPushNotification(state.notificationTaskName);
+        }
+
         setState(prev => {
             if (prev.currentStepIndex <= 0) return prev;
-
-            const newCompletedSteps = [...prev.completedSteps];
-            const lastCompletedStep = newCompletedSteps.pop();
-
             return {
                 ...prev,
-                isActive: true,
                 currentStepIndex: prev.currentStepIndex - 1,
-                stepStartTime: lastCompletedStep ? lastCompletedStep.startTime : prev.stepStartTime,
-                completedSteps: newCompletedSteps,
+                stepStartTime: Date.now(), // Restart step timer
+                completedSteps: prev.completedSteps.slice(0, -1),
+                notificationTaskName: null
             };
         });
-    }, []);
+    }, [state.notificationTaskName, cancelPushNotification]);
 
-    const reset = useCallback(() => {
+    const reset = useCallback(async () => {
+        if (state.notificationTaskName && cancelPushNotification) {
+            await cancelPushNotification(state.notificationTaskName);
+        }
         setState(INITIAL_STATE);
-        localStorage.removeItem(STORAGE_KEY);
-    }, []);
+        setHasPlayedChime(false);
+        setHasPlayedFinish(false);
+    }, [state.notificationTaskName, cancelPushNotification]);
 
-    const skipToFinish = useCallback(() => {
-        const currentTime = Date.now();
-        setState(prev => {
-            if (!prev.isActive || prev.currentStepIndex >= steps.length) return prev;
+    const skipToFinish = useCallback(async () => {
+        if (state.notificationTaskName && cancelPushNotification) {
+            await cancelPushNotification(state.notificationTaskName);
+        }
+        setState(prev => ({
+            ...prev,
+            currentStepIndex: steps.length, // Force finish
+            isActive: false,
+            notificationTaskName: null
+        }));
+    }, [state.notificationTaskName, cancelPushNotification, steps.length]);
 
-            // 1. Finish current step
-            const currentStep = steps[prev.currentStepIndex];
-            const currentStepDuration = Math.floor((currentTime - (prev.stepStartTime || currentTime)) / 1000);
+    // --- Computed Values ---
+    const isFinished = state.currentStepIndex >= steps.length;
+    const currentStep = isFinished ? null : steps[state.currentStepIndex];
 
-            const currentRecord: StepRecord = {
-                stepId: currentStep.id,
-                plannedDuration: currentStep.durationMinutes * 60,
-                actualDuration: currentStepDuration,
-                startTime: prev.stepStartTime || currentTime,
-                endTime: currentTime,
-            };
+    // Calculate Elapsed
+    const getElapsed = () => {
+        if (!state.isActive) {
+            return { total: 0, step: 0 };
+        }
+        return {
+            total: (now - (state.startTime || now)) / 1000,
+            step: (now - (state.stepStartTime || now)) / 1000
+        };
+    };
 
-            // 2. Skip remaining steps
-            const skippedRecords: StepRecord[] = [];
-            for (let i = prev.currentStepIndex + 1; i < steps.length; i++) {
-                const s = steps[i];
-                skippedRecords.push({
-                    stepId: s.id,
-                    plannedDuration: s.durationMinutes * 60,
-                    actualDuration: 0,
-                    startTime: currentTime,
-                    endTime: currentTime,
-                });
-            }
+    const { total: totalElapsedSeconds, step: stepElapsedSeconds } = getElapsed();
 
-            // Reset flags
-            setHasPlayedChime(false);
-            setHasPlayedFinish(false);
-            setHasNotified(false);
-
-            return {
-                ...prev,
-                isActive: false, // Stop timer
-                currentStepIndex: steps.length, // Move to end
-                stepStartTime: null,
-                completedSteps: [...prev.completedSteps, currentRecord, ...skippedRecords],
-            };
-        });
-    }, [steps]);
-
-    const currentStep = steps[state.currentStepIndex];
-
-    // Calculate elapsed times
-    const totalElapsedSeconds = state.startTime ? Math.floor((now - state.startTime) / 1000) : 0;
-    const stepElapsedSeconds = state.stepStartTime ? Math.floor((now - state.stepStartTime) / 1000) : 0;
-
-    // Sound Logic
+    // --- Audio Triggers (Client Side Only) ---
+    // Note: Push Notifications are now handled by Cloud Tasks (Server Side).
+    // sendPushNotification is intentionally unused in this effect.
     useEffect(() => {
         if (!state.isActive || !currentStep) return;
 
         const durationSeconds = currentStep.durationMinutes * 60;
+        const diff = durationSeconds - stepElapsedSeconds;
 
-        // 80% Warning Chime
-        if (!hasPlayedChime && stepElapsedSeconds >= durationSeconds * 0.8 && stepElapsedSeconds < durationSeconds) {
+        // 1. Chime (3 mins before)
+        const chimeThreshold = 180; // 3 mins
+        if (durationSeconds > chimeThreshold && diff <= chimeThreshold && diff > 0 && !hasPlayedChime) {
             playChime();
             setHasPlayedChime(true);
         }
 
-        // 100% Finish Sound
-        if (!hasPlayedFinish && stepElapsedSeconds >= durationSeconds) {
+        // 2. Finish
+        if (stepElapsedSeconds >= durationSeconds && !hasPlayedFinish) {
             playFinish();
             setHasPlayedFinish(true);
         }
     }, [state.isActive, currentStep, stepElapsedSeconds, hasPlayedChime, hasPlayedFinish, playChime, playFinish]);
-    // Notification Logic
-    useEffect(() => {
-        if (!hasNotified && stepElapsedSeconds >= (currentStep?.durationMinutes || 0) * 60) {
-            const title = '工程終了';
-            const body = `${currentStep?.name} が終了しました。次の工程へ進んでください。`;
-
-            // Local Notification
-            if (Notification.permission === 'granted') {
-                new Notification(title, {
-                    body: body,
-                    icon: './pwa-192x192.png'
-                });
-            }
-
-            // Remote Push Notification (Automatic)
-            if (sendPushNotification) {
-                sendPushNotification(title, body)
-                    .catch(err => console.error('Auto push failed:', err));
-            }
-
-            setHasNotified(true);
-        }
-    }, [hasNotified, stepElapsedSeconds, currentStep, sendPushNotification]);
-
-    const requestNotificationPermission = useCallback(() => {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-    }, []);
-
-    // Request permission on start
-    const startWithPermission = useCallback(() => {
-        requestNotificationPermission();
-        start();
-    }, [start, requestNotificationPermission]);
 
     return {
         state,
         currentStep,
         totalElapsedSeconds,
         stepElapsedSeconds,
-
-        start: startWithPermission,
+        start,
         nextStep,
         previousStep,
         reset,
-        skipToFinish, // Exposed
-        isFinished: state.currentStepIndex >= steps.length,
+        isFinished,
         isMuted,
         toggleMute,
-        requestNotificationPermission,
+        requestNotificationPermission: async () => { }, // Mock
+        skipToFinish
     };
 };
