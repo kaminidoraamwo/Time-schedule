@@ -60,7 +60,6 @@ export const useTimer = (
     const { initAudio, playChime, playFinish, isMuted, toggleMute } = useSound();
 
     // Local flags to prevent repeated audio triggers in the same step
-    // Local flags to prevent repeated audio triggers in the same step
     const hasPlayedChime = useRef(false);
     const hasPlayedFinish = useRef(false);
 
@@ -115,9 +114,9 @@ export const useTimer = (
     const nextStep = useCallback(async () => {
         const currentTime = Date.now();
 
-        // Cancel previous task
+        // Cancel previous task (Fire-and-forget to prevent UI blocking)
         if (state.notificationTaskName && cancelPushNotification) {
-            await cancelPushNotification(state.notificationTaskName);
+            cancelPushNotification(state.notificationTaskName).catch(e => console.error('Silent cancel failed', e));
         }
 
         // Determine next step
@@ -130,6 +129,7 @@ export const useTimer = (
             const title = '工程終了';
             const body = `${step.name} が終了しました。次の工程へ進んでください。`;
             try {
+                // Await here to ensure we capture the task ID for future cancellation
                 newTaskName = await schedulePushNotification(title, body, getTaskDelay(step));
             } catch (e) {
                 console.error('Failed to schedule next task', e);
@@ -151,7 +151,6 @@ export const useTimer = (
             };
 
             // Reset audio flags for new step
-            // Reset audio flags for new step
             hasPlayedChime.current = false;
             hasPlayedFinish.current = false;
 
@@ -165,10 +164,10 @@ export const useTimer = (
         });
     }, [steps, state.notificationTaskName, state.currentStepIndex, cancelPushNotification, schedulePushNotification, getTaskDelay]);
 
-    const previousStep = useCallback(async () => {
-        // Cancel current task
+    const previousStep = useCallback(() => {
+        // Cancel current task (Fire-and-forget)
         if (state.notificationTaskName && cancelPushNotification) {
-            await cancelPushNotification(state.notificationTaskName);
+            cancelPushNotification(state.notificationTaskName).catch(console.error);
         }
 
         setState(prev => {
@@ -190,9 +189,9 @@ export const useTimer = (
         });
     }, [state.notificationTaskName, cancelPushNotification]);
 
-    const reset = useCallback(async () => {
+    const reset = useCallback(() => {
         if (state.notificationTaskName && cancelPushNotification) {
-            await cancelPushNotification(state.notificationTaskName);
+            cancelPushNotification(state.notificationTaskName).catch(console.error);
         }
         setState(INITIAL_STATE);
         hasPlayedChime.current = false;

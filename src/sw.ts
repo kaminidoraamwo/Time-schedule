@@ -27,8 +27,9 @@ const messaging = getMessaging(app);
 // Handle background messages
 onBackgroundMessage(messaging, (payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    // Custom notification logic if needed, but SDK handles basic display automatically
-    // Removing manual showNotification to prevent double notifications (SDK + Manual)
+    // Custom notification logic: Explicitly show notification to ensure delivery,
+    // even if the SDK might have already shown one.
+    // Reliability is prioritized over potential double-notification risk.
     const notificationTitle = payload.notification?.title || 'Salone Pacer Notification';
     const notificationOptions = {
         body: payload.notification?.body,
