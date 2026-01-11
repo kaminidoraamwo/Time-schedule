@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { messaging, getToken, functions, httpsCallable } from '../lib/firebase';
+import { vapidKey } from '../config';
 
 export const useNotification = () => {
     const [fcmToken, setFcmToken] = useState<string>('');
@@ -18,7 +19,7 @@ export const useNotification = () => {
             const registration = await navigator.serviceWorker.ready;
             const token = await getToken(messaging, {
                 serviceWorkerRegistration: registration,
-                vapidKey: "BOtcb549zlm2Dg5qSyjAunURFku8H5Skgm21ekxka9ogNYrXY4ev4hxLzdVGx8hT-TagAarL57f1KJnPhlpdTgQ"
+                vapidKey: vapidKey
             });
 
             if (token) {

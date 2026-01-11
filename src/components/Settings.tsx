@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { Step } from '../constants';
 import type { Preset } from '../hooks/useSettings';
+import { PresetManager } from './settings/PresetManager';
+import { ScheduleEditor } from './settings/ScheduleEditor';
+import { TotalDuration } from './settings/TotalDuration';
+import { NotificationDebugPanel } from './settings/NotificationDebugPanel';
 
 type Props = {
     steps: Step[];
@@ -43,19 +47,7 @@ export const Settings: React.FC<Props> = ({
     onRequestToken,
     onTestNotification
 }) => {
-    const [newPresetName, setNewPresetName] = useState('');
-
     if (!isOpen) return null;
-
-    const handleSavePreset = () => {
-        if (!newPresetName.trim()) return;
-        onSavePreset(newPresetName);
-        setNewPresetName('');
-    };
-
-    const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
-    const totalHours = Math.floor(totalDurationMinutes / 60);
-    const totalMinutes = totalDurationMinutes % 60;
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -66,177 +58,27 @@ export const Settings: React.FC<Props> = ({
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6">
-                    {/* Presets Section */}
-                    <div className="mb-8 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <h3 className="text-lg font-bold text-blue-800 mb-3">プリセット</h3>
+                    <PresetManager
+                        presets={presets}
+                        onSavePreset={onSavePreset}
+                        onLoadPreset={onLoadPreset}
+                        onDeletePreset={onDeletePreset}
+                    />
 
-                        <div className="flex gap-2 mb-4">
-                            <input
-                                type="text"
-                                value={newPresetName}
-                                onChange={(e) => setNewPresetName(e.target.value)}
-                                placeholder="新しいプリセット名..."
-                                className="flex-1 px-3 py-2 border border-blue-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <button
-                                onClick={handleSavePreset}
-                                disabled={!newPresetName.trim()}
-                                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-bold py-2 px-4 rounded shadow"
-                            >
-                                保存
-                            </button>
-                        </div>
+                    <TotalDuration steps={steps} />
 
-                        {presets.length > 0 && (
-                            <div className="space-y-2">
-                                {presets.map(preset => (
-                                    <div key={preset.id} className="flex justify-between items-center bg-white p-2 rounded border border-blue-100">
-                                        <span className="font-medium text-gray-700">{preset.name}</span>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => onLoadPreset(preset.id)}
-                                                className="text-sm bg-green-100 hover:bg-green-200 text-green-800 py-1 px-3 rounded"
-                                            >
-                                                読込
-                                            </button>
-                                            <button
-                                                onClick={() => onDeletePreset(preset.id)}
-                                                className="text-sm bg-red-100 hover:bg-red-200 text-red-800 py-1 px-3 rounded"
-                                            >
-                                                削除
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <ScheduleEditor
+                        steps={steps}
+                        onUpdateStep={onUpdateStep}
+                        onAddStep={onAddStep}
+                        onRemoveStep={onRemoveStep}
+                        onMoveStep={onMoveStep}
+                    />
 
-                    {/* Total Duration Display */}
-                    <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-600 font-medium">合計時間</span>
-                            <span className="text-2xl font-bold text-gray-800">
-                                {totalHours}時間 {totalMinutes}分
-                            </span>
-                        </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                            {steps.length} 工程
-                        </div>
-                    </div>
-
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">スケジュール編集</h3>
-                    <div className="space-y-4">
-                        {steps.map((step, index) => (
-                            <div key={step.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <div className="flex flex-col gap-3">
-                                    {/* Row 1: Move Controls and Name */}
-                                    <div className="flex items-center gap-3 w-full">
-                                        <div className="flex flex-col gap-1">
-                                            <button
-                                                onClick={() => onMoveStep(index, 'up')}
-                                                disabled={index === 0}
-                                                className="text-gray-400 hover:text-blue-600 disabled:opacity-30 p-1"
-                                            >
-                                                ▲
-                                            </button>
-                                            <button
-                                                onClick={() => onMoveStep(index, 'down')}
-                                                disabled={index === steps.length - 1}
-                                                className="text-gray-400 hover:text-blue-600 disabled:opacity-30 p-1"
-                                            >
-                                                ▼
-                                            </button>
-                                        </div>
-
-                                        <div className="flex-1">
-                                            <label className="block text-xs text-gray-500 mb-1">工程名</label>
-                                            <input
-                                                type="text"
-                                                value={step.name}
-                                                onChange={(e) => onUpdateStep(step.id, 'name', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Row 2: Duration Controls and Delete */}
-                                    <div className="flex items-end gap-4 pl-8">
-                                        <div>
-                                            <label className="block text-xs text-gray-500 mb-1">時間設定 (分)</label>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => {
-                                                        const newVal = Math.max(1, step.durationMinutes - 1);
-                                                        onUpdateStep(step.id, 'durationMinutes', newVal);
-                                                    }}
-                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-10 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
-                                                >
-                                                    -
-                                                </button>
-
-                                                <input
-                                                    type="number"
-                                                    value={step.durationMinutes}
-                                                    onChange={(e) => {
-                                                        const val = parseInt(e.target.value);
-                                                        if (!isNaN(val)) {
-                                                            onUpdateStep(step.id, 'durationMinutes', Math.max(0, val));
-                                                        }
-                                                    }}
-                                                    className="w-14 h-10 border border-gray-300 rounded text-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                                                />
-
-                                                <button
-                                                    onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 1)}
-                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-10 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
-                                                >
-                                                    +
-                                                </button>
-
-                                                <button
-                                                    onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 5)}
-                                                    className="bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 w-10 h-10 rounded shadow-sm ml-1 flex items-center justify-center font-bold text-sm active:translate-y-0.5 transition-all"
-                                                >
-                                                    +5
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="h-10 flex items-center">
-                                            <button
-                                                onClick={() => onRemoveStep(step.id)}
-                                                className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded transition-colors w-10 h-full flex items-center justify-center"
-                                                title="削除"
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <button
-                        onClick={onAddStep}
-                        className="mt-6 w-full py-3 border-2 border-dashed border-gray-300 text-gray-500 rounded-lg hover:border-blue-500 hover:text-blue-500 transition-colors font-bold"
-                    >
-                        + ステップを追加
-                    </button>
-
-                    {/* Total Duration Display (Bottom) */}
-                    <div className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-600 font-medium">合計時間</span>
-                            <span className="text-2xl font-bold text-gray-800">
-                                {totalHours}時間 {totalMinutes}分
-                            </span>
-                        </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                            {steps.length} 工程
-                        </div>
-                    </div>
+                    <TotalDuration
+                        steps={steps}
+                        className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200"
+                    />
                 </div>
 
                 <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between items-center">
@@ -258,30 +100,11 @@ export const Settings: React.FC<Props> = ({
                     </div>
                 </div>
 
-                {/* Debug/Test Section */}
-                <div className="p-6 border-t border-gray-200 bg-gray-100">
-                    <h4 className="text-sm font-bold text-gray-500 mb-2">開発者用テスト</h4>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={onRequestToken}
-                            className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700"
-                        >
-                            1. FCMトークンを取得
-                        </button>
-                        <button
-                            onClick={onTestNotification}
-                            disabled={!fcmToken}
-                            className={`px-4 py-2 rounded text-sm ${!fcmToken ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 text-white'}`}
-                        >
-                            2. サーバー経由でテスト
-                        </button>
-                    </div>
-                    {fcmToken && (
-                        <div className="mt-2 p-2 bg-white border border-gray-300 rounded text-xs break-all font-mono select-all">
-                            {fcmToken}
-                        </div>
-                    )}
-                </div>
+                <NotificationDebugPanel
+                    fcmToken={fcmToken}
+                    onRequestToken={onRequestToken}
+                    onTestNotification={onTestNotification}
+                />
 
                 <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
                     <button
