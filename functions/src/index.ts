@@ -93,8 +93,14 @@ export const cancelNotification = onCall(async (request) => {
 export const onTaskTrigger = onRequest(async (req, res) => {
     const { token, title, body } = req.body;
 
-    // Basic Validation (Check if request comes from Cloud Tasks?)
-    // In prod, check OIDC token. For now, we trust the internal queue triggering.
+    // Validation: Check for Cloud Tasks header
+    // Google Cloud Tasks adds this header. It is stripped if sent by external user.
+    const queueName = req.header("x-cloudtasks-queuename");
+    if (!queueName) {
+        logger.warn("Received request without Cloud Tasks header. Potential scan/attack.", { ip: req.ip });
+        res.status(403).send("Forbidden");
+        return;
+    }
 
     if (!token) {
         res.status(400).send("No token");

@@ -11,11 +11,7 @@ type Props = {
     nextStep?: Step;
 };
 
-const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-};
+import { formatTimeMMSS } from '../utils/time';
 
 export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, onNext, onBack, isLastStep, isFirstStep, nextStep }) => {
     const plannedSeconds = step.durationMinutes * 60;
@@ -43,16 +39,16 @@ export const CurrentStepControl: React.FC<Props> = ({ step, stepElapsedSeconds, 
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">{step.name}</h2>
 
             <div className="text-8xl font-mono font-bold text-gray-900 mb-2 tracking-tighter">
-                {formatTime(stepElapsedSeconds)}
+                {formatTimeMMSS(stepElapsedSeconds)}
             </div>
 
             <div className={`text-xl font-bold mb-8 ${statusColor} flex items-center gap-2`}>
                 <span>{statusText}</span>
                 {overtimeSeconds > 0 && (
-                    <span>(+{formatTime(overtimeSeconds)})</span>
+                    <span>(+{formatTimeMMSS(overtimeSeconds)})</span>
                 )}
                 {overtimeSeconds === 0 && (
-                    <span className="text-gray-400 text-sm">/ {formatTime(plannedSeconds)}</span>
+                    <span className="text-gray-400 text-sm">/ {formatTimeMMSS(plannedSeconds)}</span>
                 )}
             </div>
 

@@ -8,12 +8,7 @@ type Props = {
     onReset: () => void;
 };
 
-const formatTime = (seconds: number) => {
-    const absSeconds = Math.abs(seconds);
-    const m = Math.floor(absSeconds / 60);
-    const s = Math.floor(absSeconds % 60);
-    return `${seconds < 0 ? '-' : ''}${m}m ${s}s`;
-};
+import { formatTimeShort } from '../utils/time';
 
 export const SummaryView: React.FC<Props> = ({ steps, completedSteps, onReset }) => {
     const totalPlanned = completedSteps.reduce((acc, s) => acc + s.plannedDuration, 0);
@@ -43,20 +38,20 @@ export const SummaryView: React.FC<Props> = ({ steps, completedSteps, onReset })
                             return (
                                 <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                                     <td className="py-3 px-2 text-sm font-medium text-gray-700">{step?.name || `Step ${record.stepId}`}</td>
-                                    <td className="py-3 px-2 text-right text-sm text-gray-500">{formatTime(record.plannedDuration)}</td>
-                                    <td className="py-3 px-2 text-right text-sm font-mono">{formatTime(record.actualDuration)}</td>
+                                    <td className="py-3 px-2 text-right text-sm text-gray-500">{formatTimeShort(record.plannedDuration)}</td>
+                                    <td className="py-3 px-2 text-right text-sm font-mono">{formatTimeShort(record.actualDuration)}</td>
                                     <td className={`py-3 px-2 text-right text-sm font-bold ${isLate ? 'text-red-500' : 'text-green-500'}`}>
-                                        {diff > 0 ? '+' : ''}{formatTime(diff)}
+                                        {diff > 0 ? '+' : ''}{formatTimeShort(diff)}
                                     </td>
                                 </tr>
                             );
                         })}
                         <tr className="bg-gray-50 font-bold">
                             <td className="py-4 px-2">合計</td>
-                            <td className="py-4 px-2 text-right">{formatTime(totalPlanned)}</td>
-                            <td className="py-4 px-2 text-right">{formatTime(totalActual)}</td>
+                            <td className="py-4 px-2 text-right">{formatTimeShort(totalPlanned)}</td>
+                            <td className="py-4 px-2 text-right">{formatTimeShort(totalActual)}</td>
                             <td className={`py-4 px-2 text-right ${totalDiff > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                {totalDiff > 0 ? '+' : ''}{formatTime(totalDiff)}
+                                {totalDiff > 0 ? '+' : ''}{formatTimeShort(totalDiff)}
                             </td>
                         </tr>
                     </tbody>

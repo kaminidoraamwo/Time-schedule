@@ -37,7 +37,20 @@ export const useTimer = (
     const [state, setState] = useState<TimerState>(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
-            return saved ? JSON.parse(saved) : INITIAL_STATE;
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // Check if data is stale (> 24 hours) or startTime is invalid
+                const now = Date.now();
+                const startTime = parsed.startTime || 0;
+                const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+                if (parsed.isActive && (now - startTime > ONE_DAY_MS)) {
+                    console.warn('Restoring timer state skipped due to stale data (>24h). Resetting.');
+                    return INITIAL_STATE;
+                }
+                return parsed;
+            }
+            return INITIAL_STATE;
         } catch {
             return INITIAL_STATE;
         }

@@ -78,7 +78,7 @@ export const useSettings = () => {
 
     const savePreset = useCallback((name: string) => {
         const newPreset: Preset = {
-            id: crypto.randomUUID(),
+            id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36),
             name,
             steps: [...steps], // Deep copy if needed, but shallow copy of array is enough here as steps are replaced
         };
