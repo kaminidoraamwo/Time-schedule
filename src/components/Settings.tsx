@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { Step } from '../constants';
 import type { Preset } from '../hooks/useSettings';
-import { messaging, getToken } from '../lib/firebase';
 
 type Props = {
     steps: Step[];
@@ -16,10 +15,13 @@ type Props = {
     onSavePreset: (name: string) => void;
     onLoadPreset: (id: string) => void;
     onDeletePreset: (id: string) => void;
-    // onRequestNotificationPermission removed from props interface as we handle it inside with feedback, 
-    // but keeping it if passed from parent or we can use the logic directly here.
-    // Actually, let's keep the prop but enhance the UI using local state for display.
     onRequestNotificationPermission: () => void;
+
+    // New Props for Notification Integration
+    fcmToken: string;
+    permissionStatus: NotificationPermission;
+    onRequestToken: () => Promise<string | null>;
+    onTestNotification: () => Promise<void>;
 };
 
 export const Settings: React.FC<Props> = ({
@@ -36,49 +38,12 @@ export const Settings: React.FC<Props> = ({
     onLoadPreset,
     onDeletePreset,
     onRequestNotificationPermission,
+    fcmToken,
+    permissionStatus,
+    onRequestToken,
+    onTestNotification
 }) => {
     const [newPresetName, setNewPresetName] = useState('');
-    const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>(
-        typeof Notification !== 'undefined' ? Notification.permission : 'default'
-    );
-    const [fcmToken, setFcmToken] = useState<string>('');
-
-    const handleRequestToken = async () => {
-        try {
-            // Get the active Service Worker registration
-            const registration = await navigator.serviceWorker.ready;
-
-            const token = await getToken(messaging, {
-                serviceWorkerRegistration: registration, // Explicitly use our SW
-                vapidKey: "BOtcb549zlm2Dg5qSyjAunURFku8H5Skgm21ekxka9ogNYrXY4ev4hxLzdVGx8hT-TagAarL57f1KJnPhlpdTgQ"
-            });
-            if (token) {
-                setFcmToken(token);
-                console.log('FCM Token:', token);
-            } else {
-                alert('トークンの取得に失敗しました。権限ポリシーなどを確認してください。');
-            }
-        } catch (err) {
-            console.error('An error occurred while retrieving token. ', err);
-            alert('トークン取得エラー: ' + err);
-        }
-    };
-
-    const handleRequestPermission = () => {
-        if (permissionStatus === 'granted') {
-            alert('通知は既に許可されています。');
-            return;
-        }
-        if (permissionStatus === 'denied') {
-            alert('通知がブロックされています。ブラウザの設定から許可してください。');
-            return;
-        }
-        onRequestNotificationPermission();
-        // Check again after a short delay
-        setTimeout(() => {
-            setPermissionStatus(Notification.permission);
-        }, 1000);
-    };
 
     if (!isOpen) return null;
 
@@ -283,7 +248,7 @@ export const Settings: React.FC<Props> = ({
                             デフォルトに戻す
                         </button>
                         <button
-                            onClick={handleRequestPermission}
+                            onClick={onRequestNotificationPermission}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium underline flex items-center gap-1"
                         >
                             {permissionStatus === 'granted' ? '✅ 通知許可済み' :
@@ -293,22 +258,30 @@ export const Settings: React.FC<Props> = ({
                     </div>
                 </div>
 
-                {/* Debug/Test Section
+                {/* Debug/Test Section */}
                 <div className="p-6 border-t border-gray-200 bg-gray-100">
                     <h4 className="text-sm font-bold text-gray-500 mb-2">開発者用テスト</h4>
-                    <button
-                        onClick={handleRequestToken}
-                        className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700"
-                    >
-                        FCMトークンを取得
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={onRequestToken}
+                            className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700"
+                        >
+                            1. FCMトークンを取得
+                        </button>
+                        <button
+                            onClick={onTestNotification}
+                            disabled={!fcmToken}
+                            className={`px-4 py-2 rounded text-sm ${!fcmToken ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 text-white'}`}
+                        >
+                            2. サーバー経由でテスト
+                        </button>
+                    </div>
                     {fcmToken && (
                         <div className="mt-2 p-2 bg-white border border-gray-300 rounded text-xs break-all font-mono select-all">
                             {fcmToken}
                         </div>
                     )}
                 </div>
-                */}
 
                 <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
                     <button

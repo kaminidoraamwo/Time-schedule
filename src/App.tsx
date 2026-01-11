@@ -1,10 +1,14 @@
 
+import { useEffect } from 'react';
 import { useTimer } from './hooks/useTimer';
 import { useSettings } from './hooks/useSettings';
+import { useNotification } from './hooks/useNotification';
 import { ProgressBar } from './components/ProgressBar';
 import { CurrentStepControl } from './components/CurrentStepControl';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
+import { onMessage, messaging } from './lib/firebase';
+import type { MessagePayload } from 'firebase/messaging';
 
 function App() {
   const {
@@ -23,6 +27,13 @@ function App() {
   } = useSettings();
 
   const {
+    fcmToken,
+    permissionStatus,
+    requestToken,
+    sendPushNotification
+  } = useNotification();
+
+  const {
     state,
     currentStep,
     totalElapsedSeconds,
@@ -36,7 +47,23 @@ function App() {
     toggleMute,
     requestNotificationPermission,
     skipToFinish
-  } = useTimer(steps);
+  } = useTimer(steps, sendPushNotification);
+
+  // Listen for foreground notifications
+  useEffect(() => {
+    const unsubscribe = onMessage(messaging, (message: MessagePayload) => {
+      console.log('Foreground message received:', message);
+      const title = message.notification?.title || 'Notification';
+      const body = message.notification?.body || '';
+      // Show system notification even if in foreground (if permitted)
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body });
+      } else {
+        alert(`${title}\n${body}`);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const isNotStarted = !state.isActive && state.currentStepIndex === 0;
   const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);

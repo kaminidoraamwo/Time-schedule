@@ -28,7 +28,8 @@ const INITIAL_STATE: TimerState = {
     completedSteps: [],
 };
 
-export const useTimer = (steps: Step[]) => {
+export const useTimer = (steps: Step[], sendPushNotification?: (title: string, body: string) => Promise<void>) => {
+
     const [state, setState] = useState<TimerState>(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -206,15 +207,26 @@ export const useTimer = (steps: Step[]) => {
     // Notification Logic
     useEffect(() => {
         if (!hasNotified && stepElapsedSeconds >= (currentStep?.durationMinutes || 0) * 60) {
+            const title = '工程終了';
+            const body = `${currentStep?.name} が終了しました。次の工程へ進んでください。`;
+
+            // Local Notification
             if (Notification.permission === 'granted') {
-                new Notification('工程終了', {
-                    body: `${currentStep?.name} が終了しました。次の工程へ進んでください。`,
+                new Notification(title, {
+                    body: body,
                     icon: './pwa-192x192.png'
                 });
-                setHasNotified(true);
             }
+
+            // Remote Push Notification (Automatic)
+            if (sendPushNotification) {
+                sendPushNotification(title, body)
+                    .catch(err => console.error('Auto push failed:', err));
+            }
+
+            setHasNotified(true);
         }
-    }, [hasNotified, stepElapsedSeconds, currentStep]);
+    }, [hasNotified, stepElapsedSeconds, currentStep, sendPushNotification]);
 
     const requestNotificationPermission = useCallback(() => {
         if ('Notification' in window && Notification.permission === 'default') {
