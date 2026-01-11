@@ -12,13 +12,23 @@ export type Preset = {
 
 export const useSettings = () => {
     const [steps, setSteps] = useState<Step[]>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : SCHEDULE_STEPS;
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : SCHEDULE_STEPS;
+        } catch (error) {
+            console.error('Failed to parse settings:', error);
+            return SCHEDULE_STEPS;
+        }
     });
 
     const [presets, setPresets] = useState<Preset[]>(() => {
-        const saved = localStorage.getItem(PRESETS_KEY);
-        return saved ? JSON.parse(saved) : [];
+        try {
+            const saved = localStorage.getItem(PRESETS_KEY);
+            return saved ? JSON.parse(saved) : [];
+        } catch (error) {
+            console.error('Failed to parse presets:', error);
+            return [];
+        }
     });
 
     const [isOpen, setIsOpen] = useState(false);

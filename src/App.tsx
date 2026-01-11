@@ -102,16 +102,28 @@ function App() {
               totalElapsedSeconds={totalElapsedSeconds}
             />
 
-            <div className="flex-grow flex items-center justify-center mt-8">
+            <div className="flex-grow flex flex-col items-center justify-center mt-8 space-y-8">
               {currentStep && (
-                <CurrentStepControl
-                  step={currentStep}
-                  stepElapsedSeconds={stepElapsedSeconds}
-                  onNext={nextStep}
-                  onBack={previousStep}
-                  isLastStep={state.currentStepIndex === steps.length - 1}
-                  isFirstStep={state.currentStepIndex === 0}
-                />
+                <>
+                  <CurrentStepControl
+                    step={currentStep}
+                    stepElapsedSeconds={stepElapsedSeconds}
+                    onNext={nextStep}
+                    onBack={previousStep}
+                    isLastStep={state.currentStepIndex === steps.length - 1}
+                    isFirstStep={state.currentStepIndex === 0}
+                  />
+
+                  {/* Total Elapsed Time Display */}
+                  <div className="flex flex-col items-center p-4 bg-white/50 rounded-xl">
+                    <div className="text-gray-500 text-sm font-medium mb-1">経過時間 / 合計予定</div>
+                    <div className="text-3xl font-bold text-gray-700 font-mono tracking-tight">
+                      {Math.floor(totalElapsedSeconds / 3600)}:{(Math.floor((totalElapsedSeconds % 3600) / 60)).toString().padStart(2, '0')}:{(totalElapsedSeconds % 60).toString().padStart(2, '0')}
+                      <span className="text-gray-400 mx-2 text-xl align-middle">/</span>
+                      {Math.floor(totalDurationMinutes / 60)}:{(totalDurationMinutes % 60).toString().padStart(2, '0')}:00
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>

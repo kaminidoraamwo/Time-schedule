@@ -30,8 +30,13 @@ const INITIAL_STATE: TimerState = {
 
 export const useTimer = (steps: Step[]) => {
     const [state, setState] = useState<TimerState>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : INITIAL_STATE;
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : INITIAL_STATE;
+        } catch (error) {
+            console.error('Failed to parse timer state:', error);
+            return INITIAL_STATE;
+        }
     });
 
     const { playChime, playFinish, initAudio, isMuted, toggleMute } = useSound();
