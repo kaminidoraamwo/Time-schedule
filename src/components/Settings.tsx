@@ -168,14 +168,43 @@ export const Settings: React.FC<Props> = ({
                                     />
                                 </div>
 
-                                <div className="w-24">
+                                <div className="w-40">
                                     <label className="block text-xs text-gray-500 mb-1">分</label>
-                                    <input
-                                        type="number"
-                                        value={step.durationMinutes}
-                                        onChange={(e) => onUpdateStep(step.id, 'durationMinutes', parseInt(e.target.value) || 0)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={() => {
+                                                const newVal = Math.max(1, step.durationMinutes - 1);
+                                                onUpdateStep(step.id, 'durationMinutes', newVal);
+                                            }}
+                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-10 rounded-l flex items-center justify-center font-bold"
+                                        >
+                                            -
+                                        </button>
+                                        <input
+                                            type="number"
+                                            value={step.durationMinutes}
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value);
+                                                if (!isNaN(val)) {
+                                                    onUpdateStep(step.id, 'durationMinutes', Math.max(0, val));
+                                                }
+                                            }}
+                                            className="w-full px-2 py-2 border-y border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                                        />
+                                        <button
+                                            onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 1)}
+                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-10 rounded-r flex items-center justify-center font-bold"
+                                        >
+                                            +
+                                        </button>
+                                        <button
+                                            onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 5)}
+                                            className="bg-blue-100 hover:bg-blue-200 text-blue-700 w-8 h-10 rounded ml-1 flex items-center justify-center font-bold text-xs"
+                                            title="+5分"
+                                        >
+                                            +5
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <button
