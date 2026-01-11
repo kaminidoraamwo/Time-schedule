@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Step } from '../constants';
 import type { Preset } from '../hooks/useSettings';
+import { messaging, getToken } from '../lib/firebase';
 
 type Props = {
     steps: Step[];
@@ -40,6 +41,28 @@ export const Settings: React.FC<Props> = ({
     const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>(
         typeof Notification !== 'undefined' ? Notification.permission : 'default'
     );
+    const [fcmToken, setFcmToken] = useState<string>('');
+
+    const handleRequestToken = async () => {
+        try {
+            // Get the active Service Worker registration
+            const registration = await navigator.serviceWorker.ready;
+
+            const token = await getToken(messaging, {
+                serviceWorkerRegistration: registration, // Explicitly use our SW
+                vapidKey: "BOtcb549zlm2Dg5qSyjAunURFku8H5Skgm21ekxka9ogNYrXY4ev4hxLzdVGx8hT-TagAarL57f1KJnPhlpdTgQ"
+            });
+            if (token) {
+                setFcmToken(token);
+                console.log('FCM Token:', token);
+            } else {
+                alert('トークンの取得に失敗しました。権限ポリシーなどを確認してください。');
+            }
+        } catch (err) {
+            console.error('An error occurred while retrieving token. ', err);
+            alert('トークン取得エラー: ' + err);
+        }
+    };
 
     const handleRequestPermission = () => {
         if (permissionStatus === 'granted') {
@@ -268,6 +291,26 @@ export const Settings: React.FC<Props> = ({
                                     '🔔 通知を許可'}
                         </button>
                     </div>
+                </div>
+
+                {/* Debug/Test Section
+                <div className="p-6 border-t border-gray-200 bg-gray-100">
+                    <h4 className="text-sm font-bold text-gray-500 mb-2">開発者用テスト</h4>
+                    <button
+                        onClick={handleRequestToken}
+                        className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700"
+                    >
+                        FCMトークンを取得
+                    </button>
+                    {fcmToken && (
+                        <div className="mt-2 p-2 bg-white border border-gray-300 rounded text-xs break-all font-mono select-all">
+                            {fcmToken}
+                        </div>
+                    )}
+                </div>
+                */}
+
+                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
                     <button
                         onClick={onClose}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow"

@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/Time-schedule/dev-sw.js?dev-sw', { scope: '/Time-schedule/', type: 'module' })
