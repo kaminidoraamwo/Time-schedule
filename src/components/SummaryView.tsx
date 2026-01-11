@@ -11,7 +11,7 @@ type Props = {
 const formatTime = (seconds: number) => {
     const absSeconds = Math.abs(seconds);
     const m = Math.floor(absSeconds / 60);
-    const s = absSeconds % 60;
+    const s = Math.floor(absSeconds % 60);
     return `${seconds < 0 ? '-' : ''}${m}m ${s}s`;
 };
 
