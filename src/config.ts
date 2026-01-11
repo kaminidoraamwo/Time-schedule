@@ -1,10 +1,10 @@
 export const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID
+    apiKey: "AIzaSyChbBQnMB3sBggkMC2LerQD1DY4CUAHBv8",
+    authDomain: "salon-pacer-app.firebaseapp.com",
+    projectId: "salon-pacer-app",
+    storageBucket: "salon-pacer-app.firebasestorage.app",
+    messagingSenderId: "859913575834",
+    appId: "1:859913575834:web:5843dd0131839c60cf2e23"
 };
 
-export const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+export const vapidKey = "BOtcb549zlm2Dg5qSyjAunURFku8H5Skgm21ekxka9ogNYrXY4ev4hxLzdVGx8hT-TagAarL57f1KJnPhlpdTgQ";
