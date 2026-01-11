@@ -134,6 +134,51 @@ export const useTimer = (steps: Step[]) => {
         localStorage.removeItem(STORAGE_KEY);
     }, []);
 
+    const skipToFinish = useCallback(() => {
+        const currentTime = Date.now();
+        setState(prev => {
+            if (!prev.isActive || prev.currentStepIndex >= steps.length) return prev;
+
+            // 1. Finish current step
+            const currentStep = steps[prev.currentStepIndex];
+            const currentStepDuration = Math.floor((currentTime - (prev.stepStartTime || currentTime)) / 1000);
+
+            const currentRecord: StepRecord = {
+                stepId: currentStep.id,
+                plannedDuration: currentStep.durationMinutes * 60,
+                actualDuration: currentStepDuration,
+                startTime: prev.stepStartTime || currentTime,
+                endTime: currentTime,
+            };
+
+            // 2. Skip remaining steps
+            const skippedRecords: StepRecord[] = [];
+            for (let i = prev.currentStepIndex + 1; i < steps.length; i++) {
+                const s = steps[i];
+                skippedRecords.push({
+                    stepId: s.id,
+                    plannedDuration: s.durationMinutes * 60,
+                    actualDuration: 0,
+                    startTime: currentTime,
+                    endTime: currentTime,
+                });
+            }
+
+            // Reset flags
+            setHasPlayedChime(false);
+            setHasPlayedFinish(false);
+            setHasNotified(false);
+
+            return {
+                ...prev,
+                isActive: false, // Stop timer
+                currentStepIndex: steps.length, // Move to end
+                stepStartTime: null,
+                completedSteps: [...prev.completedSteps, currentRecord, ...skippedRecords],
+            };
+        });
+    }, [steps]);
+
     const currentStep = steps[state.currentStepIndex];
 
     // Calculate elapsed times
@@ -193,6 +238,7 @@ export const useTimer = (steps: Step[]) => {
         nextStep,
         previousStep,
         reset,
+        skipToFinish, // Exposed
         isFinished: state.currentStepIndex >= steps.length,
         isMuted,
         toggleMute,

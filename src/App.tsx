@@ -34,7 +34,8 @@ function App() {
     isFinished,
     isMuted,
     toggleMute,
-    requestNotificationPermission
+    requestNotificationPermission,
+    skipToFinish
   } = useTimer(steps);
 
   const isNotStarted = !state.isActive && state.currentStepIndex === 0;
@@ -114,7 +115,6 @@ function App() {
                     isFirstStep={state.currentStepIndex === 0}
                   />
 
-                  {/* Total Elapsed Time Display */}
                   <div className="flex flex-col items-center p-4 bg-white/50 rounded-xl">
                     <div className="text-gray-500 text-sm font-medium mb-1">経過時間 / 合計予定</div>
                     <div className="text-3xl font-bold text-gray-700 font-mono tracking-tight">
@@ -123,6 +123,17 @@ function App() {
                       {Math.floor(totalDurationMinutes / 60)}:{(totalDurationMinutes % 60).toString().padStart(2, '0')}:00
                     </div>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      if (confirm('残りの工程をスキップして終了しますか？\n（現在までの記録は保存されます）')) {
+                        skipToFinish();
+                      }
+                    }}
+                    className="mt-2 px-4 py-2 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+                  >
+                    強制終了（スキップ）
+                  </button>
                 </>
               )}
             </div>
