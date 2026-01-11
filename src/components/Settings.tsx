@@ -140,80 +140,92 @@ export const Settings: React.FC<Props> = ({
                     <h3 className="text-lg font-bold text-gray-800 mb-3">スケジュール編集</h3>
                     <div className="space-y-4">
                         {steps.map((step, index) => (
-                            <div key={step.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                <div className="flex flex-col gap-1">
-                                    <button
-                                        onClick={() => onMoveStep(index, 'up')}
-                                        disabled={index === 0}
-                                        className="text-gray-400 hover:text-blue-600 disabled:opacity-30"
-                                    >
-                                        ▲
-                                    </button>
-                                    <button
-                                        onClick={() => onMoveStep(index, 'down')}
-                                        disabled={index === steps.length - 1}
-                                        className="text-gray-400 hover:text-blue-600 disabled:opacity-30"
-                                    >
-                                        ▼
-                                    </button>
-                                </div>
+                            <div key={step.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <div className="flex flex-col gap-3">
+                                    {/* Row 1: Move Controls and Name */}
+                                    <div className="flex items-center gap-3 w-full">
+                                        <div className="flex flex-col gap-1">
+                                            <button
+                                                onClick={() => onMoveStep(index, 'up')}
+                                                disabled={index === 0}
+                                                className="text-gray-400 hover:text-blue-600 disabled:opacity-30 p-1"
+                                            >
+                                                ▲
+                                            </button>
+                                            <button
+                                                onClick={() => onMoveStep(index, 'down')}
+                                                disabled={index === steps.length - 1}
+                                                className="text-gray-400 hover:text-blue-600 disabled:opacity-30 p-1"
+                                            >
+                                                ▼
+                                            </button>
+                                        </div>
 
-                                <div className="flex-1">
-                                    <label className="block text-xs text-gray-500 mb-1">工程名</label>
-                                    <input
-                                        type="text"
-                                        value={step.name}
-                                        onChange={(e) => onUpdateStep(step.id, 'name', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
-                                </div>
+                                        <div className="flex-1">
+                                            <label className="block text-xs text-gray-500 mb-1">工程名</label>
+                                            <input
+                                                type="text"
+                                                value={step.name}
+                                                onChange={(e) => onUpdateStep(step.id, 'name', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
 
-                                <div className="w-40">
-                                    <label className="block text-xs text-gray-500 mb-1">分</label>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={() => {
-                                                const newVal = Math.max(1, step.durationMinutes - 1);
-                                                onUpdateStep(step.id, 'durationMinutes', newVal);
-                                            }}
-                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-10 rounded-l flex items-center justify-center font-bold"
-                                        >
-                                            -
-                                        </button>
-                                        <input
-                                            type="number"
-                                            value={step.durationMinutes}
-                                            onChange={(e) => {
-                                                const val = parseInt(e.target.value);
-                                                if (!isNaN(val)) {
-                                                    onUpdateStep(step.id, 'durationMinutes', Math.max(0, val));
-                                                }
-                                            }}
-                                            className="w-full px-2 py-2 border-y border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
-                                        />
-                                        <button
-                                            onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 1)}
-                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-10 rounded-r flex items-center justify-center font-bold"
-                                        >
-                                            +
-                                        </button>
-                                        <button
-                                            onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 5)}
-                                            className="bg-blue-100 hover:bg-blue-200 text-blue-700 w-8 h-10 rounded ml-1 flex items-center justify-center font-bold text-xs"
-                                            title="+5分"
-                                        >
-                                            +5
-                                        </button>
+                                    {/* Row 2: Duration Controls and Delete */}
+                                    <div className="flex items-end gap-4 pl-8">
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">時間設定 (分)</label>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const newVal = Math.max(1, step.durationMinutes - 1);
+                                                        onUpdateStep(step.id, 'durationMinutes', newVal);
+                                                    }}
+                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-12 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
+                                                >
+                                                    -
+                                                </button>
+
+                                                <input
+                                                    type="number"
+                                                    value={step.durationMinutes}
+                                                    onChange={(e) => {
+                                                        const val = parseInt(e.target.value);
+                                                        if (!isNaN(val)) {
+                                                            onUpdateStep(step.id, 'durationMinutes', Math.max(0, val));
+                                                        }
+                                                    }}
+                                                    className="w-16 h-10 border border-gray-300 rounded text-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                                                />
+
+                                                <button
+                                                    onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 1)}
+                                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 w-12 h-10 rounded shadow-sm flex items-center justify-center font-bold text-lg active:translate-y-0.5 transition-all"
+                                                >
+                                                    +
+                                                </button>
+
+                                                <button
+                                                    onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 5)}
+                                                    className="bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 w-12 h-10 rounded shadow-sm ml-1 flex items-center justify-center font-bold text-sm active:translate-y-0.5 transition-all"
+                                                >
+                                                    +5
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="h-10 flex items-center">
+                                            <button
+                                                onClick={() => onRemoveStep(step.id)}
+                                                className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded transition-colors w-10 h-full flex items-center justify-center"
+                                                title="削除"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <button
-                                    onClick={() => onRemoveStep(step.id)}
-                                    className="text-red-400 hover:text-red-600 p-2"
-                                    title="Remove Step"
-                                >
-                                    🗑️
-                                </button>
                             </div>
                         ))}
                     </div>
