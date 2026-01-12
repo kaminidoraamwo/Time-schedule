@@ -15,7 +15,6 @@ export type TimerState = {
     currentStepIndex: number;
     stepStartTime: number | null; // Current step start time
     completedSteps: StepRecord[];
-    notificationTaskName: string | null;
 };
 
 const STORAGE_KEY = 'salon-pacer-state';
@@ -26,14 +25,9 @@ const INITIAL_STATE: TimerState = {
     currentStepIndex: 0,
     stepStartTime: null,
     completedSteps: [],
-    notificationTaskName: null,
 };
 
-export const useTimer = (
-    steps: Step[],
-    schedulePushNotification?: (title: string, body: string, delaySeconds: number) => Promise<string | null>,
-    cancelPushNotification?: (taskName: string) => Promise<void>
-) => {
+export const useTimer = (steps: Step[]) => {
     const [state, setState] = useState<TimerState>(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -63,11 +57,6 @@ export const useTimer = (
     const hasPlayedChime = useRef(false);
     const hasPlayedFinish = useRef(false);
 
-    // Helper to calculate task delay
-    const getTaskDelay = useCallback((step: Step) => {
-        return step.durationMinutes * 60;
-    }, []);
-
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [state]);
@@ -80,24 +69,9 @@ export const useTimer = (
         return () => clearInterval(interval);
     }, [state.isActive]);
 
-    const start = useCallback(async () => {
+    const start = useCallback(() => {
         initAudio();
         const currentTime = Date.now();
-
-        // Schedule notification for the first step
-        let taskName: string | null = null;
-        if (steps.length > 0 && schedulePushNotification) {
-            const step = steps[state.currentStepIndex];
-            if (step) {
-                const title = '工程終了';
-                const body = `${step.name} が終了しました。次の工程へ進んでください。`;
-                try {
-                    taskName = await schedulePushNotification(title, body, getTaskDelay(step));
-                } catch (e) {
-                    console.error('Failed to schedule start task', e);
-                }
-            }
-        }
 
         setState(prev => {
             if (prev.isActive) return prev;
@@ -106,35 +80,15 @@ export const useTimer = (
                 isActive: true,
                 startTime: prev.startTime ?? currentTime,
                 stepStartTime: prev.stepStartTime ?? currentTime,
-                notificationTaskName: taskName
             };
         });
-    }, [initAudio, steps, state.currentStepIndex, schedulePushNotification, getTaskDelay]);
+    }, [initAudio]);
 
-    const nextStep = useCallback(async () => {
+    const nextStep = useCallback(() => {
         const currentTime = Date.now();
-
-        // Cancel previous task (Fire-and-forget to prevent UI blocking)
-        if (state.notificationTaskName && cancelPushNotification) {
-            cancelPushNotification(state.notificationTaskName).catch(e => console.error('Silent cancel failed', e));
-        }
 
         // Determine next step
         const nextIndex = state.currentStepIndex + 1;
-
-        // Schedule next task if available
-        let newTaskName: string | null = null;
-        if (nextIndex < steps.length && schedulePushNotification) {
-            const step = steps[nextIndex];
-            const title = '工程終了';
-            const body = `${step.name} が終了しました。次の工程へ進んでください。`;
-            try {
-                // Await here to ensure we capture the task ID for future cancellation
-                newTaskName = await schedulePushNotification(title, body, getTaskDelay(step));
-            } catch (e) {
-                console.error('Failed to schedule next task', e);
-            }
-        }
 
         setState(prev => {
             if (!prev.isActive || prev.currentStepIndex >= steps.length) return prev;
@@ -159,17 +113,11 @@ export const useTimer = (
                 currentStepIndex: nextIndex,
                 stepStartTime: currentTime,
                 completedSteps: [...prev.completedSteps, newRecord],
-                notificationTaskName: newTaskName
             };
         });
-    }, [steps, state.notificationTaskName, state.currentStepIndex, cancelPushNotification, schedulePushNotification, getTaskDelay]);
+    }, [steps, state.currentStepIndex]);
 
     const previousStep = useCallback(() => {
-        // Cancel current task (Fire-and-forget)
-        if (state.notificationTaskName && cancelPushNotification) {
-            cancelPushNotification(state.notificationTaskName).catch(console.error);
-        }
-
         setState(prev => {
             if (prev.currentStepIndex <= 0) return prev;
             const lastStep = prev.completedSteps[prev.completedSteps.length - 1];
@@ -184,32 +132,23 @@ export const useTimer = (
                 currentStepIndex: prev.currentStepIndex - 1,
                 stepStartTime: restoredStartTime,
                 completedSteps: prev.completedSteps.slice(0, -1),
-                notificationTaskName: null
             };
         });
-    }, [state.notificationTaskName, cancelPushNotification]);
+    }, []);
 
     const reset = useCallback(() => {
-        if (state.notificationTaskName && cancelPushNotification) {
-            cancelPushNotification(state.notificationTaskName).catch(console.error);
-        }
         setState(INITIAL_STATE);
         hasPlayedChime.current = false;
         hasPlayedFinish.current = false;
-    }, [state.notificationTaskName, cancelPushNotification]);
+    }, []);
 
     const skipToFinish = useCallback(() => {
-        if (state.notificationTaskName && cancelPushNotification) {
-            // Fire and forget cancellation to prevent UI blocking
-            cancelPushNotification(state.notificationTaskName).catch(console.error);
-        }
         setState(prev => ({
             ...prev,
             currentStepIndex: steps.length, // Force finish
             isActive: false,
-            notificationTaskName: null
         }));
-    }, [state.notificationTaskName, cancelPushNotification, steps.length]);
+    }, [steps.length]);
 
     // --- Computed Values ---
     const isFinished = state.currentStepIndex >= steps.length;
@@ -229,8 +168,6 @@ export const useTimer = (
     const { total: totalElapsedSeconds, step: stepElapsedSeconds } = getElapsed();
 
     // --- Audio Triggers (Client Side Only) ---
-    // Note: Push Notifications are now handled by Cloud Tasks (Server Side).
-    // sendPushNotification is intentionally unused in this effect.
     useEffect(() => {
         if (!state.isActive || !currentStep) return;
 
@@ -264,7 +201,6 @@ export const useTimer = (
         isFinished,
         isMuted,
         toggleMute,
-        requestNotificationPermission: async () => { }, // Mock
         skipToFinish
     };
 };

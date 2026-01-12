@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      strategies: 'injectManifest', // Needed for custom SW (Firebase)
+      strategies: 'injectManifest', // Custom Service Worker for Frontend Only
       srcDir: 'src',
       filename: 'sw.ts', // We will write our own SW in TypeScript
       includeAssets: ['pwa-192x192.png', 'pwa-512x512.png'],

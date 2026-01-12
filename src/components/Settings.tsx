@@ -6,7 +6,7 @@ import { ScheduleEditor } from './settings/ScheduleEditor';
 import { TotalDuration } from './settings/TotalDuration';
 
 
-type Props = {
+type SettingsProps = {
     steps: Step[];
     presets: Preset[];
     isOpen: boolean;
@@ -19,13 +19,9 @@ type Props = {
     onSavePreset: (name: string) => void;
     onLoadPreset: (id: string) => void;
     onDeletePreset: (id: string) => void;
-    onRequestNotificationPermission: () => void;
-    permissionStatus: NotificationPermission;
-
-    // New Props for Notification Integration
 };
 
-export const Settings: React.FC<Props> = ({
+export const Settings: React.FC<SettingsProps> = ({
     steps,
     presets,
     isOpen,
@@ -38,8 +34,6 @@ export const Settings: React.FC<Props> = ({
     onSavePreset,
     onLoadPreset,
     onDeletePreset,
-    onRequestNotificationPermission,
-    permissionStatus,
 }) => {
     // Confirmation State
     const [confirmState, setConfirmState] = useState<{
@@ -121,14 +115,6 @@ export const Settings: React.FC<Props> = ({
                             className="text-red-600 hover:text-red-800 text-sm font-medium underline"
                         >
                             デフォルトに戻す
-                        </button>
-                        <button
-                            onClick={onRequestNotificationPermission}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline flex items-center gap-1"
-                        >
-                            {permissionStatus === 'granted' ? '✅ 通知許可済み' :
-                                permissionStatus === 'denied' ? '🚫 通知拒否設定' :
-                                    '🔔 通知を許可'}
                         </button>
                     </div>
                 </div>

@@ -14,28 +14,5 @@ precacheAndRoute(self.__WB_MANIFEST)
 self.skipWaiting()
 clientsClaim()
 
-// 4. Firebase Messaging Service Worker
-import { initializeApp } from "firebase/app";
-import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
 
-import { firebaseConfig } from './config';
-
-// Initialize Firebase in SW
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-
-// Handle background messages
-onBackgroundMessage(messaging, (payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    // Custom notification logic: Explicitly show notification to ensure delivery,
-    // even if the SDK might have already shown one.
-    // Reliability is prioritized over potential double-notification risk.
-    const notificationTitle = payload.notification?.title || 'Salone Pacer Notification';
-    const notificationOptions = {
-        body: payload.notification?.body,
-        icon: '/pwa-192x192.png'
-    };
-    self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-console.log('Service Worker (with Firebase) is running!')
+console.log('Service Worker (Frontend Only) is running!')

@@ -1,14 +1,12 @@
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTimer } from './hooks/useTimer';
 import { useSettings } from './hooks/useSettings';
-import { useNotification } from './hooks/useNotification';
+import { useWakeLock } from './hooks/useWakeLock'; // Import WakeLock hook
 import { ProgressBar } from './components/ProgressBar';
 import { CurrentStepControl } from './components/CurrentStepControl';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
-import { onMessage, messaging } from './lib/firebase';
-import type { MessagePayload } from 'firebase/messaging';
 import { formatTimeHMMSS } from './utils/time';
 
 function App() {
@@ -29,13 +27,6 @@ function App() {
   } = useSettings();
 
   const {
-    permissionStatus,
-
-    schedulePushNotification,
-    cancelPushNotification
-  } = useNotification();
-
-  const {
     state,
     currentStep,
     totalElapsedSeconds,
@@ -47,27 +38,11 @@ function App() {
     isFinished,
     isMuted,
     toggleMute,
-    requestNotificationPermission,
     skipToFinish
-  } = useTimer(steps, schedulePushNotification, cancelPushNotification);
+  } = useTimer(steps);
 
-  // Listen for foreground notifications
-  useEffect(() => {
-    const unsubscribe = onMessage(messaging, (message: MessagePayload) => {
-      console.log('Foreground message received:', message);
-      const title = message.notification?.title || 'Notification';
-      const body = message.notification?.body || '';
-      // Show system notification even if in foreground (if permitted)
-      if (Notification.permission === 'granted') {
-        new Notification(title, { body });
-      } else {
-        alert(`${title}\n${body}`);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-
+  // Enable Screen Wake Lock when timer is active
+  useWakeLock(state.isActive);
 
   const isNotStarted = !state.isActive && state.currentStepIndex === 0;
   const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
@@ -106,8 +81,6 @@ function App() {
         onSavePreset={savePreset}
         onLoadPreset={loadPreset}
         onDeletePreset={deletePreset}
-        onRequestNotificationPermission={requestNotificationPermission}
-        permissionStatus={permissionStatus}
       />
 
       {showSkipConfirm && (
