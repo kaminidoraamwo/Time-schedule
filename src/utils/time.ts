@@ -41,3 +41,21 @@ export const formatTimeShort = (seconds: number) => {
     const totalMinutes = h * 60 + m;
     return `${sign}${totalMinutes}m ${s}s`;
 };
+
+/**
+ * Natural language format for differences (e.g. 3分, 1分30秒)
+ * Used in ProgressBar status messages
+ */
+export const formatDiffNatural = (seconds: number): string => {
+    const abs = Math.abs(Math.round(seconds));
+    const mins = Math.floor(abs / 60);
+    const secs = abs % 60;
+
+    if (mins === 0) {
+        return `${secs}秒`;
+    } else if (secs === 0) {
+        return `${mins}分`;
+    } else {
+        return `${mins}分${secs}秒`;
+    }
+};

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export const useWakeLock = (isActive: boolean) => {
     const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null);
@@ -34,6 +34,13 @@ export const useWakeLock = (isActive: boolean) => {
         }
     }, [wakeLock]);
 
+    // Store wakeLock in ref for cleanup
+    const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+    useEffect(() => {
+        wakeLockRef.current = wakeLock;
+    }, [wakeLock]);
+
     useEffect(() => {
         if (isActive) {
             requestWakeLock();
@@ -42,11 +49,10 @@ export const useWakeLock = (isActive: boolean) => {
         }
 
         return () => {
-            // Cleanup on unmount or when isActive changes to false
-            // Note: releaseWakeLock depends on wakeLock state, so we need to be careful not to create loops.
-            // But here we just want to ensure release on unmount.
-            // Actually, we can just rely on the else branch or a separate cleanup?
-            // Safer to have a ref or just rely on the effect dependency.
+            // Cleanup on unmount - use ref to avoid stale closure
+            if (wakeLockRef.current) {
+                wakeLockRef.current.release().catch(console.error);
+            }
         };
     }, [isActive, requestWakeLock, releaseWakeLock]);
 

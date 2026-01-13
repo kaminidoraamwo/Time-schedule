@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { Step } from '../constants';
+import { STORAGE_KEYS, type Step } from '../constants';
 import { useSound } from './useSound';
 
 export type StepRecord = {
@@ -17,7 +17,7 @@ export type TimerState = {
     completedSteps: StepRecord[];
 };
 
-const STORAGE_KEY = 'salon-pacer-state';
+const STORAGE_KEY = STORAGE_KEYS.TIMER_STATE;
 
 const INITIAL_STATE: TimerState = {
     isActive: false,

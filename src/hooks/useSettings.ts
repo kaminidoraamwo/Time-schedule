@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SCHEDULE_STEPS, type Step } from '../constants';
+import { SCHEDULE_STEPS, STORAGE_KEYS, type Step } from '../constants';
 
-const STORAGE_KEY = 'salon-pacer-settings';
-const PRESETS_KEY = 'salon-pacer-presets';
+const STORAGE_KEY = STORAGE_KEYS.SETTINGS;
+const PRESETS_KEY = STORAGE_KEYS.PRESETS;
 
 export type Preset = {
     id: string;

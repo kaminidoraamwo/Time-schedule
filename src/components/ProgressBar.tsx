@@ -1,27 +1,12 @@
 import React, { useState } from 'react';
 import type { Step } from '../constants';
+import { formatDiffNatural } from '../utils/time';
 
 type Props = {
     steps: Step[];
     totalElapsedSeconds: number;
     currentStepIndex: number;
     stepElapsedSeconds: number;
-    completedSteps: { actualDuration: number }[];
-};
-
-// Format seconds to natural language
-const formatDiffNatural = (seconds: number): string => {
-    const abs = Math.abs(Math.round(seconds));
-    const mins = Math.floor(abs / 60);
-    const secs = abs % 60;
-
-    if (mins === 0) {
-        return `${secs}秒`;
-    } else if (secs === 0) {
-        return `${mins}分`;
-    } else {
-        return `${mins}分${secs}秒`;
-    }
 };
 
 export const ProgressBar: React.FC<Props> = ({
@@ -29,7 +14,6 @@ export const ProgressBar: React.FC<Props> = ({
     totalElapsedSeconds,
     currentStepIndex,
     stepElapsedSeconds,
-    // completedSteps - reserved for future use
 }) => {
     const [selectedStep, setSelectedStep] = useState<{ step: Step; position: number } | null>(null);
 
@@ -126,19 +110,19 @@ export const ProgressBar: React.FC<Props> = ({
                 >
                     <div
                         className={`absolute bottom-1 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap ${selectedStep.position < 20
-                                ? 'left-0'
-                                : selectedStep.position > 80
-                                    ? 'right-0'
-                                    : 'left-0 -translate-x-1/2'
+                            ? 'left-0'
+                            : selectedStep.position > 80
+                                ? 'right-0'
+                                : 'left-0 -translate-x-1/2'
                             }`}
                     >
                         {selectedStep.step.name} ({selectedStep.step.durationMinutes}分)
                         <div
                             className={`absolute top-full border-4 border-transparent border-t-gray-800 ${selectedStep.position < 20
-                                    ? 'left-4'
-                                    : selectedStep.position > 80
-                                        ? 'right-4'
-                                        : 'left-1/2 -translate-x-1/2'
+                                ? 'left-4'
+                                : selectedStep.position > 80
+                                    ? 'right-4'
+                                    : 'left-1/2 -translate-x-1/2'
                                 }`}
                         />
                     </div>

@@ -109,17 +109,12 @@ export const Settings: React.FC<SettingsProps> = ({
                 </div>
 
                 <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between items-center">
-                    <div className="flex gap-4">
-                        <button
-                            onClick={handleResetRequest}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium underline"
-                        >
-                            デフォルトに戻す
-                        </button>
-                    </div>
-                </div>
-
-                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end">
+                    <button
+                        onClick={handleResetRequest}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                    >
+                        デフォルトに戻す
+                    </button>
                     <button
                         onClick={onClose}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow"

@@ -137,7 +137,6 @@ function App() {
               totalElapsedSeconds={totalElapsedSeconds}
               currentStepIndex={state.currentStepIndex}
               stepElapsedSeconds={stepElapsedSeconds}
-              completedSteps={state.completedSteps}
             />
 
             <div className="flex-grow flex flex-col items-center justify-center mt-8 space-y-8">

@@ -4,6 +4,13 @@ export type Step = {
   durationMinutes: number;
 };
 
+// LocalStorage keys - centralized management
+export const STORAGE_KEYS = {
+  TIMER_STATE: 'salon-pacer-state',
+  SETTINGS: 'salon-pacer-settings',
+  PRESETS: 'salon-pacer-presets',
+} as const;
+
 export const SCHEDULE_STEPS: Step[] = [
   { id: 1, name: 'カウンセリング', durationMinutes: 20 },
   { id: 2, name: 'シャンプー', durationMinutes: 10 },
