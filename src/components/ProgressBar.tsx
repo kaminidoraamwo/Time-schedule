@@ -124,9 +124,23 @@ export const ProgressBar: React.FC<Props> = ({
                     className="relative h-0 z-30"
                     style={{ marginLeft: `${selectedStep.position}%` }}
                 >
-                    <div className="absolute bottom-1 left-0 -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                    <div
+                        className={`absolute bottom-1 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap ${selectedStep.position < 20
+                                ? 'left-0'
+                                : selectedStep.position > 80
+                                    ? 'right-0'
+                                    : 'left-0 -translate-x-1/2'
+                            }`}
+                    >
                         {selectedStep.step.name} ({selectedStep.step.durationMinutes}分)
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                        <div
+                            className={`absolute top-full border-4 border-transparent border-t-gray-800 ${selectedStep.position < 20
+                                    ? 'left-4'
+                                    : selectedStep.position > 80
+                                        ? 'right-4'
+                                        : 'left-1/2 -translate-x-1/2'
+                                }`}
+                        />
                     </div>
                 </div>
             )}
@@ -136,7 +150,17 @@ export const ProgressBar: React.FC<Props> = ({
                 {/* Schedule Bar (予定) */}
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 w-8 text-right font-medium">予定</span>
-                    <div className="flex-1 relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="flex-1 relative h-6 rounded-full overflow-hidden">
+                        {/* Alternating background segments */}
+                        <div className="absolute inset-0 flex">
+                            {steps.map((step, index) => (
+                                <div
+                                    key={`bg-${step.id}`}
+                                    style={{ width: `${stepWidths[index]}%` }}
+                                    className={`h-full ${index % 2 === 0 ? 'bg-gray-200' : 'bg-gray-300'}`}
+                                />
+                            ))}
+                        </div>
                         <div
                             className={`absolute top-0 left-0 h-full ${scheduleBarColor} transition-all duration-200 ease-linear`}
                             style={{ width: `${scheduleProgressPercent}%` }}
@@ -158,7 +182,17 @@ export const ProgressBar: React.FC<Props> = ({
                 {/* Actual Bar (実際) */}
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 w-8 text-right font-medium">実際</span>
-                    <div className="flex-1 relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="flex-1 relative h-6 rounded-full overflow-hidden">
+                        {/* Alternating background segments */}
+                        <div className="absolute inset-0 flex">
+                            {steps.map((step, index) => (
+                                <div
+                                    key={`bg-${step.id}`}
+                                    style={{ width: `${stepWidths[index]}%` }}
+                                    className={`h-full ${index % 2 === 0 ? 'bg-gray-200' : 'bg-gray-300'}`}
+                                />
+                            ))}
+                        </div>
                         <div
                             className={`absolute top-0 left-0 h-full ${actualBarColor} transition-all duration-200 ease-linear`}
                             style={{ width: `${actualProgressPercent}%` }}
