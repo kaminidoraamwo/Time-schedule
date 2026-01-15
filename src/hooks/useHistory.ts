@@ -16,7 +16,6 @@ export const useHistory = () => {
             const saved = localStorage.getItem(STORAGE_KEY);
             return saved ? JSON.parse(saved) : [];
         } catch {
-            console.error('履歴の読み込みに失敗しました');
             return [];
         }
     });
@@ -27,8 +26,8 @@ export const useHistory = () => {
     useEffect(() => {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-        } catch (error) {
-            console.error('履歴の保存に失敗しました:', error);
+        } catch {
+            // 保存失敗時は静かに失敗（次回起動時に前の状態が読み込まれる）
         }
     }, [history]);
 
@@ -45,7 +44,6 @@ export const useHistory = () => {
             const elapsed = Date.now() - startTime;
             const ONE_DAY_MS = 24 * 60 * 60 * 1000;
             if (elapsed > ONE_DAY_MS) {
-                console.warn('24時間以上経過したセッションは保存しません');
                 return;
             }
         }
@@ -56,7 +54,6 @@ export const useHistory = () => {
             const lastRecord = history[0];
             const lastDate = new Date(lastRecord.date).getTime();
             if (now - lastDate < 60000) {
-                console.warn('直近1分以内に保存された記録があります');
                 return;
             }
         }

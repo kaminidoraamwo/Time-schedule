@@ -33,13 +33,37 @@ export const formatTimeHMMSS = (seconds: number) => {
 };
 
 /**
- * Xm Ys format (e.g. 10m 5s)
- * Used in Summary View
+ * 秒を「○分○秒」形式に変換（日本語）
+ * Used in SummaryView, HistoryDetailView
  */
-export const formatTimeShort = (seconds: number) => {
-    const { m, s, h, sign } = getDurationParts(seconds);
-    const totalMinutes = h * 60 + m;
-    return `${sign}${totalMinutes}m ${s}s`;
+export const formatTimeJapanese = (seconds: number): string => {
+    const absSeconds = Math.abs(seconds);
+    const mins = Math.floor(absSeconds / 60);
+    const secs = Math.floor(absSeconds % 60);
+    const sign = seconds < 0 ? '-' : '';
+    if (mins === 0) return `${sign}${secs}秒`;
+    return `${sign}${mins}分${secs}秒`;
+};
+
+/**
+ * 日付を日本語形式に変換
+ * Used in SummaryView, HistoryView, HistoryDetailView
+ */
+export const formatDateJapanese = (date: Date | string): string => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
+/**
+ * 秒を「○時間○分」形式に変換（履歴一覧用）
+ * Used in HistoryView
+ */
+export const formatDurationJapanese = (seconds: number): string => {
+    const totalMinutes = Math.floor(seconds / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (hours > 0) return `${hours}時間${mins}分`;
+    return `${totalMinutes}分`;
 };
 
 /**

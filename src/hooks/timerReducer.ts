@@ -87,7 +87,6 @@ export const loadTimerState = (storageKey: string): TimerState => {
 
             // Check if data is stale (> 24 hours)
             if (parsed.isActive && (now - startTime > ONE_DAY_MS)) {
-                console.warn('Restoring timer state skipped due to stale data (>24h). Resetting.');
                 return INITIAL_TIMER_STATE;
             }
             return parsed;

@@ -1,29 +1,13 @@
 import React, { useState } from 'react';
 import type { SessionRecord } from '../types';
 import { HistoryDetailView } from './HistoryDetailView';
+import { formatDurationJapanese, formatDateJapanese } from '../utils/time';
 
 type Props = {
     history: SessionRecord[];
     onDelete: (id: string) => void;
     onClearAll: () => void;
     onClose: () => void;
-};
-
-// 秒を「○分」または「○時間○分」形式に変換
-const formatDuration = (seconds: number): string => {
-    const totalMinutes = Math.floor(seconds / 60);
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    if (hours > 0) {
-        return `${hours}時間${mins}分`;
-    }
-    return `${totalMinutes}分`;
-};
-
-// ISO日時を日本語形式に変換
-const formatDate = (isoString: string): string => {
-    const date = new Date(isoString);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 };
 
 export const HistoryView: React.FC<Props> = ({
@@ -81,12 +65,12 @@ export const HistoryView: React.FC<Props> = ({
                                     <div key={record.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="text-lg font-medium">
-                                                📅 {formatDate(record.date)}
+                                                📅 {formatDateJapanese(record.date)}
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-3 gap-2 text-sm text-gray-600 mb-3">
-                                            <div>予定: {formatDuration(record.totalPlannedSeconds)}</div>
-                                            <div>実績: {formatDuration(record.totalActualSeconds)}</div>
+                                            <div>予定: {formatDurationJapanese(record.totalPlannedSeconds)}</div>
+                                            <div>実績: {formatDurationJapanese(record.totalActualSeconds)}</div>
                                             <div className={`font-bold ${isLate ? 'text-red-500' : 'text-green-500'}`}>
                                                 差分: {isLate ? '+' : ''}{diffMinutes}分 {isLate ? '⚠️' : '👍'}
                                             </div>

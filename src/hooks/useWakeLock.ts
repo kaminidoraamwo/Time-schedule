@@ -9,26 +9,23 @@ export const useWakeLock = (isActive: boolean) => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const lock = await (navigator as any).wakeLock.request('screen');
                 setWakeLock(lock);
-                console.log('Wake Lock active');
 
                 lock.addEventListener('release', () => {
-                    console.log('Wake Lock released');
                     setWakeLock(null);
                 });
-            } catch (err: any) {
-                console.error(`${err.name}, ${err.message}`);
+            } catch {
+                // Wake Lock取得失敗（バッテリー残量低下時など）
             }
-        } else {
-            console.log('Wake Lock API not supported');
         }
+        // Wake Lock API非対応ブラウザでは何もしない
     }, []);
 
     const releaseWakeLock = useCallback(async () => {
         if (wakeLock) {
             try {
                 await wakeLock.release();
-            } catch (err) {
-                console.error('Failed to release wake lock', err);
+            } catch {
+                // 解放失敗時は無視
             }
             setWakeLock(null);
         }
@@ -51,7 +48,7 @@ export const useWakeLock = (isActive: boolean) => {
         return () => {
             // Cleanup on unmount - use ref to avoid stale closure
             if (wakeLockRef.current) {
-                wakeLockRef.current.release().catch(console.error);
+                wakeLockRef.current.release().catch(() => { });
             }
         };
     }, [isActive, requestWakeLock, releaseWakeLock]);
@@ -70,3 +67,4 @@ export const useWakeLock = (isActive: boolean) => {
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [isActive, requestWakeLock]);
 };
+

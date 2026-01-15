@@ -1,22 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SCHEDULE_STEPS, STORAGE_KEYS, type Step } from '../constants';
+import { SCHEDULE_STEPS, STORAGE_KEYS } from '../constants';
+import type { Step, Preset } from '../types';
 
 const STORAGE_KEY = STORAGE_KEYS.SETTINGS;
 const PRESETS_KEY = STORAGE_KEYS.PRESETS;
-
-export type Preset = {
-    id: string;
-    name: string;
-    steps: Step[];
-};
 
 export const useSettings = () => {
     const [steps, setSteps] = useState<Step[]>(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
             return saved ? JSON.parse(saved) : SCHEDULE_STEPS;
-        } catch (error) {
-            console.error('Failed to parse settings:', error);
+        } catch {
             return SCHEDULE_STEPS;
         }
     });
@@ -25,8 +19,7 @@ export const useSettings = () => {
         try {
             const saved = localStorage.getItem(PRESETS_KEY);
             return saved ? JSON.parse(saved) : [];
-        } catch (error) {
-            console.error('Failed to parse presets:', error);
+        } catch {
             return [];
         }
     });
