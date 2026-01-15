@@ -5,9 +5,24 @@ import type { ProgressStatus, StepStatus } from '../types';
  * Calculate progress status based on difference percentage
  * Used by ProgressBar for overall session status
  */
+
+// 10秒以内の差は「順調」として扱う（細かい変動を吸収）
+const TOLERANCE_SECONDS = 10;
+
 export const getProgressStatus = (diffPercent: number, diffSeconds: number): ProgressStatus => {
-    if (diffPercent > 0) {
-        // Ahead of schedule
+    // ±10秒以内なら「順調」として表示（誤差を吸収）
+    if (Math.abs(diffSeconds) <= TOLERANCE_SECONDS) {
+        return {
+            level: 'onTime',
+            barColor: 'bg-green-500',
+            bgColor: 'bg-green-100',
+            textColor: 'text-green-700',
+            message: '順調なペースです 👍',
+        };
+    }
+
+    if (diffSeconds > 0) {
+        // Ahead of schedule（10秒以上早い）
         return {
             level: 'ahead',
             barColor: 'bg-blue-500',
@@ -16,7 +31,7 @@ export const getProgressStatus = (diffPercent: number, diffSeconds: number): Pro
             message: `予定より ${formatDiffNatural(diffSeconds)} 早いペースです 👍`,
         };
     } else if (diffPercent <= -20) {
-        // Very late
+        // Very late（20%以上遅れ）
         return {
             level: 'veryLate',
             barColor: 'bg-red-500',
@@ -25,7 +40,7 @@ export const getProgressStatus = (diffPercent: number, diffSeconds: number): Pro
             message: `${formatDiffNatural(Math.abs(diffSeconds))} 遅れています ⚠️`,
         };
     } else if (diffPercent <= -10) {
-        // Slightly late
+        // Slightly late（10〜20%遅れ）
         return {
             level: 'slightlyLate',
             barColor: 'bg-amber-500',
@@ -33,24 +48,15 @@ export const getProgressStatus = (diffPercent: number, diffSeconds: number): Pro
             textColor: 'text-amber-700',
             message: `${formatDiffNatural(Math.abs(diffSeconds))} 遅れています`,
         };
-    } else if (diffPercent < 0) {
-        // Minor delay (within 10%)
-        return {
-            level: 'onTime',
-            barColor: 'bg-green-500',
-            bgColor: 'bg-green-100',
-            textColor: 'text-green-700',
-            message: `少し遅れ気味です（${formatDiffNatural(Math.abs(diffSeconds))}）`,
-        };
     }
 
-    // On time
+    // Minor delay（10%未満の遅れ、ただし10秒超）
     return {
         level: 'onTime',
         barColor: 'bg-green-500',
         bgColor: 'bg-green-100',
         textColor: 'text-green-700',
-        message: '順調なペースです 👍',
+        message: `少し遅れ気味です（${formatDiffNatural(Math.abs(diffSeconds))}）`,
     };
 };
 
