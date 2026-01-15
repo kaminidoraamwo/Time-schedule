@@ -8,7 +8,11 @@ export const STORAGE_KEYS = {
   TIMER_STATE: 'salon-pacer-state',
   SETTINGS: 'salon-pacer-settings',
   PRESETS: 'salon-pacer-presets',
+  HISTORY: 'salon-pacer-history',
 } as const;
+
+// 履歴の最大保存件数
+export const MAX_HISTORY_COUNT = 100;
 
 export const SCHEDULE_STEPS: Step[] = [
   { id: 1, name: 'カウンセリング', durationMinutes: 20 },

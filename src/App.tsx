@@ -2,15 +2,19 @@
 import { useState } from 'react';
 import { useTimer } from './hooks/useTimer';
 import { useSettings } from './hooks/useSettings';
-import { useWakeLock } from './hooks/useWakeLock'; // Import WakeLock hook
+import { useWakeLock } from './hooks/useWakeLock';
+import { useHistory } from './hooks/useHistory';
 import { ProgressBar } from './components/ProgressBar';
 import { CurrentStepControl } from './components/CurrentStepControl';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
+import { HistoryView } from './components/HistoryView';
 import { formatTimeHMMSS } from './utils/time';
 
 function App() {
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
   const {
     steps,
     isOpen: isSettingsOpen,
@@ -41,10 +45,12 @@ function App() {
     skipToFinish
   } = useTimer(steps);
 
+  const { history, addRecord, deleteRecord, clearAll } = useHistory();
+
   // Enable Screen Wake Lock when timer is active
   useWakeLock(state.isActive);
 
-  const isNotStarted = !state.isActive && state.currentStepIndex === 0;
+  const isNotStarted = !state.isActive && state.currentStepIndex === 0 && !isFinished;
   const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
 
   return (
@@ -83,13 +89,23 @@ function App() {
         onDeletePreset={deletePreset}
       />
 
+      {/* 履歴画面 */}
+      {isHistoryOpen && (
+        <HistoryView
+          history={history}
+          onDelete={deleteRecord}
+          onClearAll={clearAll}
+          onClose={() => setIsHistoryOpen(false)}
+        />
+      )}
+
       {showSkipConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
             <h3 className="text-lg font-bold text-gray-800 mb-2">確認</h3>
             <p className="text-gray-600 mb-6">
               残りの工程をスキップして終了しますか？<br />
-              <span className="text-sm text-gray-500">（現在までの記録は保存されます）</span>
+              <span className="text-sm text-gray-500">（この施術は履歴に保存されません）</span>
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -126,6 +142,14 @@ function App() {
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-3xl font-bold py-8 px-16 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95 disabled:hover:scale-100 disabled:active:scale-100"
             >
               スタート
+            </button>
+
+            {/* 履歴ボタン（スタート画面のみ） */}
+            <button
+              onClick={() => setIsHistoryOpen(true)}
+              className="mt-8 text-gray-500 hover:text-blue-600 transition-colors"
+            >
+              📜 履歴を見る
             </button>
           </div>
         )}
@@ -178,6 +202,9 @@ function App() {
             steps={steps}
             completedSteps={state.completedSteps}
             onReset={reset}
+            finishReason={state.finishReason}
+            startTime={state.startTime}
+            onSaveHistory={addRecord}
           />
         )}
       </main>

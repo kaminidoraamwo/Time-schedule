@@ -17,12 +17,29 @@ export type StepRecord = {
   difference: number;
 };
 
+// 履歴保存用（工程名を含む）
+export type StepRecordWithName = StepRecord & {
+  stepName: string;
+};
+
+export type FinishReason = 'completed' | 'skipped' | null;
+
 export type TimerState = {
   isActive: boolean;
   startTime: number | null;
   currentStepIndex: number;
   stepStartTime: number | null;
   completedSteps: StepRecord[];
+  finishReason: FinishReason;
+};
+
+// === History Types ===
+export type SessionRecord = {
+  id: string;
+  date: string; // ISO形式
+  totalPlannedSeconds: number;
+  totalActualSeconds: number;
+  steps: StepRecordWithName[];
 };
 
 // === Settings Types ===

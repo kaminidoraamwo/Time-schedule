@@ -62,7 +62,10 @@ export const useTimer = (steps: Step[]) => {
         hasPlayedChime.current = false;
         hasPlayedFinish.current = false;
 
-        dispatch({ type: 'NEXT_STEP', payload: { currentTime, newRecord } });
+        // 最後のステップかどうかを判定
+        const isLastStep = state.currentStepIndex === steps.length - 1;
+
+        dispatch({ type: 'NEXT_STEP', payload: { currentTime, newRecord, isLastStep } });
     }, [steps, state.isActive, state.currentStepIndex, state.stepStartTime]);
 
     const previousStep = useCallback(() => {

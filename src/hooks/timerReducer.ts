@@ -3,7 +3,7 @@ import type { TimerState, StepRecord } from '../types';
 // === Action Types ===
 export type TimerAction =
     | { type: 'START'; payload: { currentTime: number } }
-    | { type: 'NEXT_STEP'; payload: { currentTime: number; newRecord: StepRecord } }
+    | { type: 'NEXT_STEP'; payload: { currentTime: number; newRecord: StepRecord; isLastStep: boolean } }
     | { type: 'PREVIOUS_STEP'; payload: { restoredStartTime: number } }
     | { type: 'SKIP_TO_FINISH'; payload: { stepsLength: number } }
     | { type: 'RESET' };
@@ -15,6 +15,7 @@ export const INITIAL_TIMER_STATE: TimerState = {
     currentStepIndex: 0,
     stepStartTime: null,
     completedSteps: [],
+    finishReason: null,
 };
 
 // === Reducer ===
@@ -28,16 +29,19 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 isActive: true,
                 startTime: state.startTime ?? currentTime,
                 stepStartTime: state.stepStartTime ?? currentTime,
+                finishReason: null,
             };
         }
 
         case 'NEXT_STEP': {
-            const { currentTime, newRecord } = action.payload;
+            const { currentTime, newRecord, isLastStep } = action.payload;
             return {
                 ...state,
                 currentStepIndex: state.currentStepIndex + 1,
                 stepStartTime: currentTime,
                 completedSteps: [...state.completedSteps, newRecord],
+                isActive: isLastStep ? false : state.isActive,
+                finishReason: isLastStep ? 'completed' : null,
             };
         }
 
@@ -49,6 +53,7 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 currentStepIndex: state.currentStepIndex - 1,
                 stepStartTime: restoredStartTime,
                 completedSteps: state.completedSteps.slice(0, -1),
+                finishReason: null,
             };
         }
 
@@ -58,6 +63,7 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 ...state,
                 currentStepIndex: stepsLength,
                 isActive: false,
+                finishReason: 'skipped',
             };
         }
 
