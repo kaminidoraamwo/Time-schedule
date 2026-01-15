@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Step } from '../constants';
-import type { Preset } from '../hooks/useSettings';
+import type { Preset } from '../types';
 import { PresetManager } from './settings/PresetManager';
 import { ScheduleEditor } from './settings/ScheduleEditor';
 import { TotalDuration } from './settings/TotalDuration';

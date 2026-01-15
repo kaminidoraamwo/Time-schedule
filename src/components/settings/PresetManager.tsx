@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Preset } from '../../hooks/useSettings';
+import type { Preset } from '../../types';
 
 type Props = {
     presets: Preset[];
