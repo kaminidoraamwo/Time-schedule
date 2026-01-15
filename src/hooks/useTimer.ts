@@ -1,187 +1,117 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { STORAGE_KEYS, type Step } from '../constants';
+import { useReducer, useEffect, useCallback, useRef, useState } from 'react';
+import { STORAGE_KEYS } from '../constants';
+import type { Step, StepRecord } from '../types';
 import { useSound } from './useSound';
-
-export type StepRecord = {
-    stepId: number;
-    plannedDuration: number; // Seconds
-    actualDuration: number; // Seconds
-    difference: number;
-};
-
-export type TimerState = {
-    isActive: boolean;
-    startTime: number | null; // Session start time
-    currentStepIndex: number;
-    stepStartTime: number | null; // Current step start time
-    completedSteps: StepRecord[];
-};
+import { timerReducer, loadTimerState } from './timerReducer';
 
 const STORAGE_KEY = STORAGE_KEYS.TIMER_STATE;
 
-const INITIAL_STATE: TimerState = {
-    isActive: false,
-    startTime: null,
-    currentStepIndex: 0,
-    stepStartTime: null,
-    completedSteps: [],
-};
+// === Audio Trigger Constants ===
+const CHIME_THRESHOLD_SECONDS = 180; // 3 minutes before
 
 export const useTimer = (steps: Step[]) => {
-    const [state, setState] = useState<TimerState>(() => {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                // Check if data is stale (> 24 hours) or startTime is invalid
-                const now = Date.now();
-                const startTime = parsed.startTime || 0;
-                const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-                if (parsed.isActive && (now - startTime > ONE_DAY_MS)) {
-                    console.warn('Restoring timer state skipped due to stale data (>24h). Resetting.');
-                    return INITIAL_STATE;
-                }
-                return parsed;
-            }
-            return INITIAL_STATE;
-        } catch {
-            return INITIAL_STATE;
-        }
-    });
+    const [state, dispatch] = useReducer(
+        timerReducer,
+        STORAGE_KEY,
+        loadTimerState
+    );
 
     const [now, setNow] = useState(() => Date.now());
     const { initAudio, playChime, playFinish, isMuted, toggleMute } = useSound();
 
-    // Local flags to prevent repeated audio triggers in the same step
+    // Audio trigger flags
     const hasPlayedChime = useRef(false);
     const hasPlayedFinish = useRef(false);
 
+    // Persist state to localStorage
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [state]);
 
+    // Update current time periodically when active
     useEffect(() => {
         if (!state.isActive) return;
         const interval = setInterval(() => {
             setNow(Date.now());
-        }, 200); // Check every 200ms
+        }, 200);
         return () => clearInterval(interval);
     }, [state.isActive]);
 
+    // === Actions ===
     const start = useCallback(() => {
         initAudio();
-        const currentTime = Date.now();
-
-        setState(prev => {
-            if (prev.isActive) return prev;
-            return {
-                ...prev,
-                isActive: true,
-                startTime: prev.startTime ?? currentTime,
-                stepStartTime: prev.stepStartTime ?? currentTime,
-            };
-        });
+        dispatch({ type: 'START', payload: { currentTime: Date.now() } });
     }, [initAudio]);
 
     const nextStep = useCallback(() => {
+        if (!state.isActive || state.currentStepIndex >= steps.length) return;
+
         const currentTime = Date.now();
+        const actualDuration = (currentTime - (state.stepStartTime || currentTime)) / 1000;
+        const currentStep = steps[state.currentStepIndex];
+        const plannedDuration = currentStep ? currentStep.durationMinutes * 60 : 0;
 
-        // Determine next step
-        const nextIndex = state.currentStepIndex + 1;
+        const newRecord: StepRecord = {
+            stepId: currentStep ? currentStep.id : -1,
+            plannedDuration,
+            actualDuration,
+            difference: actualDuration - plannedDuration,
+        };
 
-        setState(prev => {
-            if (!prev.isActive || prev.currentStepIndex >= steps.length) return prev;
+        // Reset audio flags for new step
+        hasPlayedChime.current = false;
+        hasPlayedFinish.current = false;
 
-            const actualDuration = (currentTime - (prev.stepStartTime || currentTime)) / 1000;
-            const currentStep = steps[prev.currentStepIndex];
-            const plannedDuration = currentStep ? currentStep.durationMinutes * 60 : 0;
-
-            const newRecord: StepRecord = {
-                stepId: currentStep ? currentStep.id : -1,
-                plannedDuration: plannedDuration,
-                actualDuration: actualDuration,
-                difference: actualDuration - plannedDuration,
-            };
-
-            // Reset audio flags for new step
-            hasPlayedChime.current = false;
-            hasPlayedFinish.current = false;
-
-            return {
-                ...prev,
-                currentStepIndex: nextIndex,
-                stepStartTime: currentTime,
-                completedSteps: [...prev.completedSteps, newRecord],
-            };
-        });
-    }, [steps, state.currentStepIndex]);
+        dispatch({ type: 'NEXT_STEP', payload: { currentTime, newRecord } });
+    }, [steps, state.isActive, state.currentStepIndex, state.stepStartTime]);
 
     const previousStep = useCallback(() => {
-        setState(prev => {
-            if (prev.currentStepIndex <= 0) return prev;
-            const lastStep = prev.completedSteps[prev.completedSteps.length - 1];
-            // Restore start time: (Current Step Start Time) - (Previous Step Duration)
-            // This effectively merges the time spent in the current step into the previous step
-            const restoredStartTime = lastStep && prev.stepStartTime
-                ? prev.stepStartTime - (lastStep.actualDuration * 1000)
-                : Date.now();
+        if (state.currentStepIndex <= 0) return;
 
-            return {
-                ...prev,
-                currentStepIndex: prev.currentStepIndex - 1,
-                stepStartTime: restoredStartTime,
-                completedSteps: prev.completedSteps.slice(0, -1),
-            };
-        });
-    }, []);
+        const lastStep = state.completedSteps[state.completedSteps.length - 1];
+        const restoredStartTime = lastStep && state.stepStartTime
+            ? state.stepStartTime - (lastStep.actualDuration * 1000)
+            : Date.now();
+
+        dispatch({ type: 'PREVIOUS_STEP', payload: { restoredStartTime } });
+    }, [state.currentStepIndex, state.completedSteps, state.stepStartTime]);
 
     const reset = useCallback(() => {
-        setState(INITIAL_STATE);
+        dispatch({ type: 'RESET' });
         hasPlayedChime.current = false;
         hasPlayedFinish.current = false;
     }, []);
 
     const skipToFinish = useCallback(() => {
-        setState(prev => ({
-            ...prev,
-            currentStepIndex: steps.length, // Force finish
-            isActive: false,
-        }));
+        dispatch({ type: 'SKIP_TO_FINISH', payload: { stepsLength: steps.length } });
     }, [steps.length]);
 
-    // --- Computed Values ---
+    // === Computed Values ===
     const isFinished = state.currentStepIndex >= steps.length;
     const currentStep = isFinished ? null : steps[state.currentStepIndex];
 
-    // Calculate Elapsed
-    const getElapsed = () => {
-        if (!state.isActive) {
-            return { total: 0, step: 0 };
-        }
-        return {
-            total: (now - (state.startTime || now)) / 1000,
-            step: (now - (state.stepStartTime || now)) / 1000
-        };
-    };
+    const totalElapsedSeconds = state.isActive
+        ? (now - (state.startTime || now)) / 1000
+        : 0;
 
-    const { total: totalElapsedSeconds, step: stepElapsedSeconds } = getElapsed();
+    const stepElapsedSeconds = state.isActive
+        ? (now - (state.stepStartTime || now)) / 1000
+        : 0;
 
-    // --- Audio Triggers (Client Side Only) ---
+    // === Audio Triggers ===
     useEffect(() => {
         if (!state.isActive || !currentStep) return;
 
         const durationSeconds = currentStep.durationMinutes * 60;
         const diff = durationSeconds - stepElapsedSeconds;
 
-        // 1. Chime (3 mins before)
-        const chimeThreshold = 180; // 3 mins
-        if (durationSeconds > chimeThreshold && diff <= chimeThreshold && diff > 0 && !hasPlayedChime.current) {
+        // Chime (3 mins before)
+        if (durationSeconds > CHIME_THRESHOLD_SECONDS && diff <= CHIME_THRESHOLD_SECONDS && diff > 0 && !hasPlayedChime.current) {
             playChime();
             hasPlayedChime.current = true;
         }
 
-        // 2. Finish
+        // Finish sound
         if (stepElapsedSeconds >= durationSeconds && !hasPlayedFinish.current) {
             playFinish();
             hasPlayedFinish.current = true;
@@ -190,7 +120,7 @@ export const useTimer = (steps: Step[]) => {
 
     return {
         state,
-        now, // Export now for synchronization
+        now,
         currentStep,
         totalElapsedSeconds,
         stepElapsedSeconds,
@@ -201,6 +131,6 @@ export const useTimer = (steps: Step[]) => {
         isFinished,
         isMuted,
         toggleMute,
-        skipToFinish
+        skipToFinish,
     };
 };

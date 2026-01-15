@@ -1,5 +1,5 @@
 import React from 'react';
-import type { StepRecord } from '../hooks/useTimer';
+import type { StepRecord } from '../types';
 import type { Step } from '../constants';
 
 type Props = {
