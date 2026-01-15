@@ -1,17 +1,21 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 export const useWakeLock = (isActive: boolean) => {
-    const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null);
+    // Use ref to track lock status without triggering re-renders
+    const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
     const requestWakeLock = useCallback(async () => {
         if ('wakeLock' in navigator) {
             try {
+                // Prevent multiple locks
+                if (wakeLockRef.current) return;
+
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const lock = await (navigator as any).wakeLock.request('screen');
-                setWakeLock(lock);
+                wakeLockRef.current = lock;
 
                 lock.addEventListener('release', () => {
-                    setWakeLock(null);
+                    wakeLockRef.current = null;
                 });
             } catch {
                 // Wake Lock取得失敗（バッテリー残量低下時など）
@@ -21,22 +25,15 @@ export const useWakeLock = (isActive: boolean) => {
     }, []);
 
     const releaseWakeLock = useCallback(async () => {
-        if (wakeLock) {
+        if (wakeLockRef.current) {
             try {
-                await wakeLock.release();
+                await wakeLockRef.current.release();
             } catch {
                 // 解放失敗時は無視
             }
-            setWakeLock(null);
+            wakeLockRef.current = null;
         }
-    }, [wakeLock]);
-
-    // Store wakeLock in ref for cleanup
-    const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-
-    useEffect(() => {
-        wakeLockRef.current = wakeLock;
-    }, [wakeLock]);
+    }, []);
 
     useEffect(() => {
         if (isActive) {
@@ -46,9 +43,10 @@ export const useWakeLock = (isActive: boolean) => {
         }
 
         return () => {
-            // Cleanup on unmount - use ref to avoid stale closure
+            // Cleanup on unmount
             if (wakeLockRef.current) {
                 wakeLockRef.current.release().catch(() => { });
+                wakeLockRef.current = null;
             }
         };
     }, [isActive, requestWakeLock, releaseWakeLock]);

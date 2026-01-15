@@ -8,10 +8,10 @@ import App from './App.tsx'
 // Register Service Worker
 registerSW({
   onNeedRefresh() {
-    console.log('New content available, verify to update.')
+
   },
   onOfflineReady() {
-    console.log('App is ready for offline usage.')
+
   },
 })
 

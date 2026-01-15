@@ -13,6 +13,3 @@ precacheAndRoute(self.__WB_MANIFEST)
 // 3. Take control immediately
 self.skipWaiting()
 clientsClaim()
-
-
-console.log('Service Worker (Frontend Only) is running!')
