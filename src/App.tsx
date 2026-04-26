@@ -3,12 +3,12 @@ import { useTimer } from './hooks/useTimer';
 import { useSettings } from './hooks/useSettings';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useHistory } from './hooks/useHistory';
-import { ProgressBar } from './components/ProgressBar';
-import { CurrentStepControl, LongPressButton } from './components/CurrentStepControl';
+import { Header } from './components/Header';
+import { StartScreen } from './components/StartScreen';
+import { ActiveTimerView } from './components/ActiveTimerView';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
 import { HistoryView } from './components/HistoryView';
-import { formatTimeHMMSS } from './utils/time';
 
 function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -55,24 +55,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
-      <header className={`bg-white shadow-sm py-4 px-6 flex justify-between items-center ${state.isActive ? 'mb-2' : 'mb-6'}`}>
-        <h1 className="text-xl font-bold text-gray-700">Salon Pacer</h1>
-        <div className="flex gap-4">
-          <button
-            onClick={toggleMute}
-            className="text-2xl hover:scale-110 transition-transform"
-            title={isMuted ? "ミュート解除" : "ミュート"}
-          >
-            {isMuted ? "🔇" : "🔊"}
-          </button>
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="text-gray-500 hover:text-blue-600"
-          >
-            ⚙️ 設定
-          </button>
-        </div>
-      </header>
+      <Header
+        isActive={state.isActive}
+        isMuted={isMuted}
+        onToggleMute={toggleMute}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+      />
 
       <Settings
         steps={steps}
@@ -99,8 +87,6 @@ function App() {
         />
       )}
 
-
-
       {/* 古いセッション期限切れダイアログ */}
       {state.hasStaleSession && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -124,90 +110,28 @@ function App() {
 
       <main className={`container mx-auto max-w-3xl ${state.isActive ? 'px-2' : 'px-4'}`}>
         {isNotStarted && (
-          <div className="flex flex-col items-center justify-center h-[60vh]">
-            <h2 className="text-4xl font-bold mb-8 text-gray-800">準備はいいですか？</h2>
-            <div className="text-gray-500 mb-12 text-center">
-              合計時間: {Math.floor(totalDurationMinutes / 60)}時間 {totalDurationMinutes % 60}分<br />
-              {steps.length} 工程
-            </div>
-            <button
-              onClick={start}
-              disabled={steps.length === 0}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-3xl font-bold py-8 px-16 rounded-full shadow-xl transform transition hover:scale-105 active:scale-95 disabled:hover:scale-100 disabled:active:scale-100"
-            >
-              スタート
-            </button>
-
-            {/* 履歴ボタン（スタート画面のみ） */}
-            <button
-              onClick={() => setIsHistoryOpen(true)}
-              className="mt-8 text-gray-500 hover:text-blue-600 transition-colors"
-            >
-              📜 履歴を見る
-            </button>
-          </div>
+          <StartScreen
+            stepsCount={steps.length}
+            totalDurationMinutes={totalDurationMinutes}
+            onStart={start}
+            onOpenHistory={() => setIsHistoryOpen(true)}
+          />
         )}
 
         {state.isActive && (
-          <div className="flex flex-col h-full">
-            <ProgressBar
-              steps={steps}
-              totalElapsedSeconds={totalElapsedSeconds}
-              currentStepIndex={state.currentStepIndex}
-              stepElapsedSeconds={stepElapsedSeconds}
-            />
-
-            <div className="flex-grow flex flex-col items-center mt-4 pb-6">
-              {currentStep && (
-                <>
-                  <CurrentStepControl
-                    step={currentStep}
-                    stepElapsedSeconds={stepElapsedSeconds}
-                    onNext={nextStep}
-                    onBack={previousStep}
-                    isPaused={state.isPaused}
-                    isLastStep={state.currentStepIndex === steps.length - 1}
-                    isFirstStep={state.currentStepIndex === 0}
-                    nextStep={steps[state.currentStepIndex + 1]}
-                    className="w-full"
-                  />
-
-                  <div className="flex flex-col items-center justify-evenly w-full flex-grow mt-6 gap-2">
-
-                  <div className="flex flex-col items-center p-3 bg-white/50 rounded-xl">
-                    <div className="text-gray-500 text-xs font-medium mb-0.5">経過時間 / 合計予定</div>
-                    <div className="text-2xl font-bold text-gray-700 font-mono tracking-tight">
-                      {formatTimeHMMSS(totalElapsedSeconds)}
-                      <span className="text-gray-400 mx-2 text-lg align-middle">/</span>
-                      {formatTimeHMMSS(totalDurationMinutes * 60)}
-                    </div>
-                  </div>
-
-                  {/* 一時停止ボタン */}
-                  <LongPressButton
-                    onAction={togglePause}
-                    progressColor={state.isPaused ? 'bg-green-300' : 'bg-gray-500'}
-                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all mt-2 ${
-                      state.isPaused
-                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
-                        : 'bg-gray-400/30 hover:bg-gray-400/50 text-gray-600'
-                    }`}
-                  >
-                    {state.isPaused ? '▶ 再開（長押し）' : '⏸ 一時停止（長押し）'}
-                  </LongPressButton>
-
-                  <LongPressButton
-                    onAction={skipToFinish}
-                    progressColor="bg-red-400"
-                    className="px-4 py-1.5 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors mt-6"
-                  >
-                    強制終了（長押し）
-                  </LongPressButton>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+          <ActiveTimerView
+            steps={steps}
+            currentStepIndex={state.currentStepIndex}
+            currentStep={currentStep || undefined}
+            totalElapsedSeconds={totalElapsedSeconds}
+            stepElapsedSeconds={stepElapsedSeconds}
+            isPaused={state.isPaused}
+            totalDurationMinutes={totalDurationMinutes}
+            onNextStep={nextStep}
+            onPreviousStep={previousStep}
+            onTogglePause={togglePause}
+            onSkipToFinish={skipToFinish}
+          />
         )}
 
         {isFinished && (
