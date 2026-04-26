@@ -126,7 +126,7 @@ export const ProgressBar: React.FC<Props> = ({
     };
 
     return (
-        <div className="w-full mb-6">
+        <div className="w-full mt-4 mb-3">
             {/* Time labels */}
             <div className="flex justify-between text-xs text-gray-500 mb-2">
                 <span>開始</span>

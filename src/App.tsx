@@ -55,7 +55,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
-      <header className="bg-white shadow-sm py-4 px-6 mb-6 flex justify-between items-center">
+      <header className={`bg-white shadow-sm py-4 px-6 flex justify-between items-center ${state.isActive ? 'mb-2' : 'mb-6'}`}>
         <h1 className="text-xl font-bold text-gray-700">Salon Pacer</h1>
         <div className="flex gap-4">
           <button
@@ -157,7 +157,7 @@ function App() {
               stepElapsedSeconds={stepElapsedSeconds}
             />
 
-            <div className="flex-grow flex flex-col items-center justify-center mt-4 space-y-4">
+            <div className="flex-grow flex flex-col items-center mt-4 pb-6">
               {currentStep && (
                 <>
                   <CurrentStepControl
@@ -172,6 +172,8 @@ function App() {
                     className="w-full"
                   />
 
+                  <div className="flex flex-col items-center justify-evenly w-full flex-grow mt-6 gap-2">
+
                   <div className="flex flex-col items-center p-3 bg-white/50 rounded-xl">
                     <div className="text-gray-500 text-xs font-medium mb-0.5">経過時間 / 合計予定</div>
                     <div className="text-2xl font-bold text-gray-700 font-mono tracking-tight">
@@ -185,7 +187,7 @@ function App() {
                   <LongPressButton
                     onAction={togglePause}
                     progressColor={state.isPaused ? 'bg-green-300' : 'bg-gray-500'}
-                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all mt-2 ${
                       state.isPaused
                         ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
                         : 'bg-gray-400/30 hover:bg-gray-400/50 text-gray-600'
@@ -197,10 +199,11 @@ function App() {
                   <LongPressButton
                     onAction={skipToFinish}
                     progressColor="bg-red-400"
-                    className="px-4 py-1.5 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+                    className="px-4 py-1.5 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors mt-6"
                   >
                     強制終了（長押し）
                   </LongPressButton>
+                  </div>
                 </>
               )}
             </div>
