@@ -6,6 +6,8 @@ export type TimerAction =
     | { type: 'NEXT_STEP'; payload: { currentTime: number; newRecord: StepRecord; isLastStep: boolean } }
     | { type: 'PREVIOUS_STEP'; payload: { restoredStartTime: number } }
     | { type: 'SKIP_TO_FINISH'; payload: { stepsLength: number } }
+    | { type: 'PAUSE'; payload: { currentTime: number } }
+    | { type: 'RESUME'; payload: { currentTime: number } }
     | { type: 'RESUME_STALE' }
     | { type: 'DISMISS_STALE' }
     | { type: 'RESET' };
@@ -19,6 +21,9 @@ export const INITIAL_TIMER_STATE: TimerState = {
     completedSteps: [],
     finishReason: null,
     hasStaleSession: false,
+    isPaused: false,
+    pausedAt: null,
+    totalPausedMs: 0,
 };
 
 // === Reducer ===
@@ -33,6 +38,9 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 startTime: state.startTime ?? currentTime,
                 stepStartTime: state.stepStartTime ?? currentTime,
                 finishReason: null,
+                isPaused: false,
+                pausedAt: null,
+                totalPausedMs: 0,
             };
         }
 
@@ -45,6 +53,9 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 completedSteps: [...state.completedSteps, newRecord],
                 isActive: isLastStep ? false : state.isActive,
                 finishReason: isLastStep ? 'completed' : null,
+                isPaused: false,
+                pausedAt: null,
+                totalPausedMs: 0,
             };
         }
 
@@ -68,6 +79,28 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 isActive: false,
                 finishReason: 'skipped',
                 hasStaleSession: false,
+                isPaused: false,
+                pausedAt: null,
+            };
+        }
+
+        case 'PAUSE': {
+            if (!state.isActive || state.isPaused) return state;
+            return {
+                ...state,
+                isPaused: true,
+                pausedAt: action.payload.currentTime,
+            };
+        }
+
+        case 'RESUME': {
+            if (!state.isPaused || !state.pausedAt) return state;
+            const pauseDuration = action.payload.currentTime - state.pausedAt;
+            return {
+                ...state,
+                isPaused: false,
+                pausedAt: null,
+                totalPausedMs: state.totalPausedMs + pauseDuration,
             };
         }
 

@@ -43,13 +43,14 @@ function App() {
     isMuted,
     toggleMute,
     skipToFinish,
+    togglePause,
     dismissStaleSession,
   } = useTimer(steps);
 
   const { history, addRecord, deleteRecord, clearAll } = useHistory();
 
-  // Enable Screen Wake Lock when timer is active
-  useWakeLock(state.isActive);
+  // Enable Screen Wake Lock when timer is active (disable during pause)
+  useWakeLock(state.isActive && !state.isPaused);
 
   const isNotStarted = !state.isActive && state.currentStepIndex === 0 && !isFinished;
   const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
@@ -193,6 +194,8 @@ function App() {
                     stepElapsedSeconds={stepElapsedSeconds}
                     onNext={nextStep}
                     onBack={previousStep}
+                    onTogglePause={togglePause}
+                    isPaused={state.isPaused}
                     isLastStep={state.currentStepIndex === steps.length - 1}
                     isFirstStep={state.currentStepIndex === 0}
                     nextStep={steps[state.currentStepIndex + 1]}

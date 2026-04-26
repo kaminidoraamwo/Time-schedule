@@ -32,6 +32,9 @@ export type TimerState = {
   completedSteps: StepRecord[];
   finishReason: FinishReason;
   hasStaleSession?: boolean;
+  isPaused: boolean;
+  pausedAt: number | null;
+  totalPausedMs: number;
 };
 
 // === History Types ===

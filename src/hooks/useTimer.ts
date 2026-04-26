@@ -28,14 +28,14 @@ export const useTimer = (steps: Step[]) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }, [state]);
 
-    // Update current time periodically when active
+    // Update current time periodically when active and not paused
     useEffect(() => {
-        if (!state.isActive) return;
+        if (!state.isActive || state.isPaused) return;
         const interval = setInterval(() => {
             setNow(Date.now());
         }, 200);
         return () => clearInterval(interval);
-    }, [state.isActive]);
+    }, [state.isActive, state.isPaused]);
 
     // === Actions ===
     const start = useCallback(() => {
@@ -47,7 +47,9 @@ export const useTimer = (steps: Step[]) => {
         if (!state.isActive || state.currentStepIndex >= steps.length) return;
 
         const currentTime = Date.now();
-        const actualDuration = (currentTime - (state.stepStartTime || currentTime)) / 1000;
+        const rawDuration = (currentTime - (state.stepStartTime || currentTime)) / 1000;
+        const pausedSeconds = state.totalPausedMs / 1000;
+        const actualDuration = rawDuration - pausedSeconds;
         const currentStep = steps[state.currentStepIndex];
         const plannedDuration = currentStep ? currentStep.durationMinutes * 60 : 0;
 
@@ -66,7 +68,7 @@ export const useTimer = (steps: Step[]) => {
         const isLastStep = state.currentStepIndex === steps.length - 1;
 
         dispatch({ type: 'NEXT_STEP', payload: { currentTime, newRecord, isLastStep } });
-    }, [steps, state.isActive, state.currentStepIndex, state.stepStartTime]);
+    }, [steps, state.isActive, state.currentStepIndex, state.stepStartTime, state.totalPausedMs]);
 
     const previousStep = useCallback(() => {
         if (state.currentStepIndex <= 0) return;
@@ -98,21 +100,33 @@ export const useTimer = (steps: Step[]) => {
         dispatch({ type: 'DISMISS_STALE' });
     }, []);
 
+    const togglePause = useCallback(() => {
+        const currentTime = Date.now();
+        if (state.isPaused) {
+            dispatch({ type: 'RESUME', payload: { currentTime } });
+        } else {
+            dispatch({ type: 'PAUSE', payload: { currentTime } });
+        }
+    }, [state.isPaused]);
+
     // === Computed Values ===
     const isFinished = state.currentStepIndex >= steps.length;
     const currentStep = isFinished ? null : steps[state.currentStepIndex];
 
+    // 一時停止中は pausedAt 時点で止める、経過時間から一時停止分を差し引く
+    const effectiveNow = state.isPaused ? (state.pausedAt || now) : now;
+
     const totalElapsedSeconds = state.isActive
-        ? (now - (state.startTime || now)) / 1000
+        ? ((effectiveNow - (state.startTime || effectiveNow)) - state.totalPausedMs) / 1000
         : 0;
 
     const stepElapsedSeconds = state.isActive
-        ? (now - (state.stepStartTime || now)) / 1000
+        ? ((effectiveNow - (state.stepStartTime || effectiveNow)) - state.totalPausedMs) / 1000
         : 0;
 
     // === Audio Triggers ===
     useEffect(() => {
-        if (!state.isActive || !currentStep) return;
+        if (!state.isActive || !currentStep || state.isPaused) return;
 
         const durationSeconds = currentStep.durationMinutes * 60;
         const diff = durationSeconds - stepElapsedSeconds;
@@ -128,7 +142,7 @@ export const useTimer = (steps: Step[]) => {
             playFinish();
             hasPlayedFinish.current = true;
         }
-    }, [state.isActive, currentStep, stepElapsedSeconds, playChime, playFinish]);
+    }, [state.isActive, state.isPaused, currentStep, stepElapsedSeconds, playChime, playFinish]);
 
     return {
         state,
@@ -144,6 +158,7 @@ export const useTimer = (steps: Step[]) => {
         isMuted,
         toggleMute,
         skipToFinish,
+        togglePause,
         resumeStaleSession,
         dismissStaleSession,
     };
