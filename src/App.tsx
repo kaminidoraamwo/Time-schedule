@@ -11,7 +11,6 @@ import { HistoryView } from './components/HistoryView';
 import { formatTimeHMMSS } from './utils/time';
 
 function App() {
-  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const {
@@ -100,34 +99,7 @@ function App() {
         />
       )}
 
-      {showSkipConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-bold text-gray-800 mb-2">確認</h3>
-            <p className="text-gray-600 mb-6">
-              残りの工程をスキップして終了しますか？<br />
-              <span className="text-sm text-gray-500">（この施術は履歴に保存されません）</span>
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowSkipConfirm(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={() => {
-                  skipToFinish();
-                  setShowSkipConfirm(false);
-                }}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm"
-              >
-                終了する
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* 古いセッション期限切れダイアログ */}
       {state.hasStaleSession && (
@@ -222,12 +194,13 @@ function App() {
                     {state.isPaused ? '▶ 再開（長押し）' : '⏸ 一時停止（長押し）'}
                   </LongPressButton>
 
-                  <button
-                    onClick={() => setShowSkipConfirm(true)}
+                  <LongPressButton
+                    onAction={skipToFinish}
+                    progressColor="bg-red-400"
                     className="px-4 py-1.5 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
                   >
-                    強制終了（スキップ）
-                  </button>
+                    強制終了（長押し）
+                  </LongPressButton>
                 </>
               )}
             </div>
