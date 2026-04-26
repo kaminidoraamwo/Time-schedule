@@ -2,6 +2,7 @@ import React from 'react';
 import type { Step } from '../types';
 import { formatTimeMMSS } from '../utils/time';
 import { getStepStatus } from '../utils/progressStatus';
+import { useLongPress } from '../hooks/useLongPress';
 
 type Props = {
     step: Step;
@@ -13,6 +14,42 @@ type Props = {
     isLastStep: boolean;
     isFirstStep: boolean;
     nextStep?: Step;
+};
+
+/**
+ * 長押しボタンコンポーネント
+ * 押している間にプログレスバーが表示される
+ */
+const LongPressButton: React.FC<{
+    onAction: () => void;
+    disabled?: boolean;
+    className: string;
+    progressColor: string;
+    children: React.ReactNode;
+}> = ({ onAction, disabled, className, progressColor, children }) => {
+    const { handlers, progress, isPressed } = useLongPress(onAction);
+
+    // disabled の場合はハンドラーを無効化
+    const activeHandlers = disabled ? {} : handlers;
+
+    return (
+        <button
+            {...activeHandlers}
+            disabled={disabled}
+            className={`${className} relative overflow-hidden select-none`}
+            // 通常のクリックを無効化（長押しのみ）
+            onClick={(e) => e.preventDefault()}
+        >
+            {/* 長押しプログレスバー */}
+            {isPressed && !disabled && (
+                <div
+                    className={`absolute bottom-0 left-0 h-1 ${progressColor} transition-none`}
+                    style={{ width: `${progress * 100}%` }}
+                />
+            )}
+            {children}
+        </button>
+    );
 };
 
 export const CurrentStepControl: React.FC<Props> = ({
@@ -61,31 +98,34 @@ export const CurrentStepControl: React.FC<Props> = ({
                 )}
             </div>
 
-            {/* 一時停止/再開ボタン */}
-            <button
-                onClick={onTogglePause}
-                className={`mb-6 px-6 py-2 rounded-full text-sm font-bold transition-all active:scale-95 ${
+            {/* 一時停止/再開ボタン（長押し） */}
+            <LongPressButton
+                onAction={onTogglePause}
+                progressColor={isPaused ? 'bg-green-300' : 'bg-gray-500'}
+                className={`mb-6 px-6 py-2 rounded-full text-sm font-bold transition-all ${
                     isPaused
                         ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
                         : 'bg-gray-400/30 hover:bg-gray-400/50 text-gray-600'
                 }`}
             >
-                {isPaused ? '▶ 再開' : '⏸ 一時停止'}
-            </button>
+                {isPaused ? '▶ 再開（長押し）' : '⏸ 一時停止（長押し）'}
+            </LongPressButton>
 
             <div className="flex gap-4 w-full max-w-md justify-center">
-                <button
-                    onClick={onBack}
+                <LongPressButton
+                    onAction={onBack}
                     disabled={isFirstStep}
-                    className="bg-gray-300 hover:bg-gray-400 disabled:opacity-30 text-gray-700 text-lg font-bold py-6 px-6 rounded-2xl shadow-md active:transform active:scale-95 transition-all flex items-center gap-1"
+                    progressColor="bg-gray-500"
+                    className="bg-gray-300 hover:bg-gray-400 disabled:opacity-30 text-gray-700 text-lg font-bold py-6 px-6 rounded-2xl shadow-md transition-all flex items-center gap-1"
                 >
                     <span>◀</span>
                     <span>戻る</span>
-                </button>
+                </LongPressButton>
 
-                <button
-                    onClick={onNext}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl shadow-md active:transform active:scale-95 transition-all flex flex-col items-center justify-center gap-1"
+                <LongPressButton
+                    onAction={onNext}
+                    progressColor="bg-blue-300"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl shadow-md transition-all flex flex-col items-center justify-center gap-1"
                 >
                     <span className="text-2xl flex items-center gap-1">{isLastStep ? '終了' : '次へ'} <span>▶</span></span>
                     {nextStep && (
@@ -93,7 +133,7 @@ export const CurrentStepControl: React.FC<Props> = ({
                             次は {nextStep.name} ({nextStep.durationMinutes}分)
                         </span>
                     )}
-                </button>
+                </LongPressButton>
             </div>
         </div>
     );
