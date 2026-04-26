@@ -31,6 +31,7 @@ export type TimerState = {
   stepStartTime: number | null;
   completedSteps: StepRecord[];
   finishReason: FinishReason;
+  hasStaleSession?: boolean;
 };
 
 // === History Types ===

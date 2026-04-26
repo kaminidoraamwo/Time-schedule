@@ -42,7 +42,8 @@ function App() {
     isFinished,
     isMuted,
     toggleMute,
-    skipToFinish
+    skipToFinish,
+    dismissStaleSession,
   } = useTimer(steps);
 
   const { history, addRecord, deleteRecord, clearAll } = useHistory();
@@ -124,6 +125,27 @@ function App() {
                 終了する
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 古いセッション期限切れダイアログ */}
+      {state.hasStaleSession && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-2">⏰ セッションの期限切れ</h3>
+            <p className="text-gray-600 mb-2">
+              前回のセッションは24時間以上経過したためリセットされます。
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              工程 {state.currentStepIndex + 1} / {steps.length}（{steps[state.currentStepIndex]?.name || '不明'}）まで進んでいました。
+            </p>
+            <button
+              onClick={dismissStaleSession}
+              className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-bold"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}

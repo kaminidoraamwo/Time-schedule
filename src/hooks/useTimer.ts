@@ -89,6 +89,15 @@ export const useTimer = (steps: Step[]) => {
         dispatch({ type: 'SKIP_TO_FINISH', payload: { stepsLength: steps.length } });
     }, [steps.length]);
 
+    const resumeStaleSession = useCallback(() => {
+        initAudio();
+        dispatch({ type: 'RESUME_STALE' });
+    }, [initAudio]);
+
+    const dismissStaleSession = useCallback(() => {
+        dispatch({ type: 'DISMISS_STALE' });
+    }, []);
+
     // === Computed Values ===
     const isFinished = state.currentStepIndex >= steps.length;
     const currentStep = isFinished ? null : steps[state.currentStepIndex];
@@ -135,5 +144,7 @@ export const useTimer = (steps: Step[]) => {
         isMuted,
         toggleMute,
         skipToFinish,
+        resumeStaleSession,
+        dismissStaleSession,
     };
 };

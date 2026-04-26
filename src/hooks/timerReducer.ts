@@ -6,6 +6,8 @@ export type TimerAction =
     | { type: 'NEXT_STEP'; payload: { currentTime: number; newRecord: StepRecord; isLastStep: boolean } }
     | { type: 'PREVIOUS_STEP'; payload: { restoredStartTime: number } }
     | { type: 'SKIP_TO_FINISH'; payload: { stepsLength: number } }
+    | { type: 'RESUME_STALE' }
+    | { type: 'DISMISS_STALE' }
     | { type: 'RESET' };
 
 // === Initial State ===
@@ -16,6 +18,7 @@ export const INITIAL_TIMER_STATE: TimerState = {
     stepStartTime: null,
     completedSteps: [],
     finishReason: null,
+    hasStaleSession: false,
 };
 
 // === Reducer ===
@@ -64,8 +67,19 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 currentStepIndex: stepsLength,
                 isActive: false,
                 finishReason: 'skipped',
+                hasStaleSession: false,
             };
         }
+
+        case 'RESUME_STALE':
+            return {
+                ...state,
+                isActive: true,
+                hasStaleSession: false,
+            };
+
+        case 'DISMISS_STALE':
+            return INITIAL_TIMER_STATE;
 
         case 'RESET':
             return INITIAL_TIMER_STATE;
@@ -85,11 +99,15 @@ export const loadTimerState = (storageKey: string): TimerState => {
             const startTime = parsed.startTime || 0;
             const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-            // Check if data is stale (> 24 hours)
+            // 24時間超の古いセッションを検出 → リセットせずユーザーに選択させる
             if (parsed.isActive && (now - startTime > ONE_DAY_MS)) {
-                return INITIAL_TIMER_STATE;
+                return {
+                    ...parsed,
+                    isActive: false,
+                    hasStaleSession: true,
+                };
             }
-            return parsed;
+            return { ...parsed, hasStaleSession: false };
         }
     } catch {
         // Fall through to return initial state
