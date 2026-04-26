@@ -42,6 +42,7 @@ export const useLongPress = (onAction: () => void) => {
     }, []);
 
     const handleStart = useCallback(() => {
+        if (timerRef.current) return; // 既に押下中なら無視（タッチ→マウスの二重発火防止）
         setIsPressed(true);
         startProgress();
         timerRef.current = setTimeout(() => {

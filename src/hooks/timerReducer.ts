@@ -8,7 +8,6 @@ export type TimerAction =
     | { type: 'SKIP_TO_FINISH'; payload: { stepsLength: number } }
     | { type: 'PAUSE'; payload: { currentTime: number } }
     | { type: 'RESUME'; payload: { currentTime: number } }
-    | { type: 'RESUME_STALE' }
     | { type: 'DISMISS_STALE' }
     | { type: 'RESET' };
 
@@ -68,6 +67,9 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 stepStartTime: restoredStartTime,
                 completedSteps: state.completedSteps.slice(0, -1),
                 finishReason: null,
+                isPaused: false,
+                pausedAt: null,
+                totalPausedMs: 0,
             };
         }
 
@@ -104,12 +106,6 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
             };
         }
 
-        case 'RESUME_STALE':
-            return {
-                ...state,
-                isActive: true,
-                hasStaleSession: false,
-            };
 
         case 'DISMISS_STALE':
             return INITIAL_TIMER_STATE;
@@ -140,7 +136,11 @@ export const loadTimerState = (storageKey: string): TimerState => {
                     hasStaleSession: true,
                 };
             }
-            return { ...parsed, hasStaleSession: false };
+            return {
+                ...INITIAL_TIMER_STATE,
+                ...parsed,
+                hasStaleSession: false,
+            };
         }
     } catch {
         // Fall through to return initial state

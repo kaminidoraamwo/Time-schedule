@@ -91,11 +91,6 @@ export const useTimer = (steps: Step[]) => {
         dispatch({ type: 'SKIP_TO_FINISH', payload: { stepsLength: steps.length } });
     }, [steps.length]);
 
-    const resumeStaleSession = useCallback(() => {
-        initAudio();
-        dispatch({ type: 'RESUME_STALE' });
-    }, [initAudio]);
-
     const dismissStaleSession = useCallback(() => {
         dispatch({ type: 'DISMISS_STALE' });
     }, []);
@@ -117,11 +112,11 @@ export const useTimer = (steps: Step[]) => {
     const effectiveNow = state.isPaused ? (state.pausedAt || now) : now;
 
     const totalElapsedSeconds = state.isActive
-        ? ((effectiveNow - (state.startTime || effectiveNow)) - state.totalPausedMs) / 1000
+        ? Math.max(0, ((effectiveNow - (state.startTime || effectiveNow)) - state.totalPausedMs) / 1000)
         : 0;
 
     const stepElapsedSeconds = state.isActive
-        ? ((effectiveNow - (state.stepStartTime || effectiveNow)) - state.totalPausedMs) / 1000
+        ? Math.max(0, ((effectiveNow - (state.stepStartTime || effectiveNow)) - state.totalPausedMs) / 1000)
         : 0;
 
     // === Audio Triggers ===
@@ -159,7 +154,6 @@ export const useTimer = (steps: Step[]) => {
         toggleMute,
         skipToFinish,
         togglePause,
-        resumeStaleSession,
         dismissStaleSession,
     };
 };

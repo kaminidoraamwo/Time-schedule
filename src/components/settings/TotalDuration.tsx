@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Step } from '../../constants';
+import type { Step } from '../../types';
 
 type Props = {
     steps: Step[];

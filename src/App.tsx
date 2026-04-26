@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useTimer } from './hooks/useTimer';
 import { useSettings } from './hooks/useSettings';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Step } from '../constants';
+import type { Step } from '../types';
 import type { Preset } from '../types';
 import { PresetManager } from './settings/PresetManager';
 import { ScheduleEditor } from './settings/ScheduleEditor';

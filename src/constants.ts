@@ -1,8 +1,5 @@
 import type { Step } from './types';
 
-// Re-export Step from types.ts for backward compatibility
-export type { Step } from './types';
-
 // LocalStorage keys - centralized management
 export const STORAGE_KEYS = {
   TIMER_STATE: 'salon-pacer-state',

@@ -48,16 +48,6 @@ export const useHistory = () => {
             }
         }
 
-        // 重複チェック（直近1分以内の記録は重複とみなす）
-        const now = Date.now();
-        if (history.length > 0) {
-            const lastRecord = history[0];
-            const lastDate = new Date(lastRecord.date).getTime();
-            if (now - lastDate < 60000) {
-                return;
-            }
-        }
-
         // 工程名を含めた記録を作成
         const stepsWithName: StepRecordWithName[] = completedSteps.map(record => {
             const step = steps.find(s => s.id === record.stepId);
@@ -76,6 +66,15 @@ export const useHistory = () => {
         };
 
         setHistory(prev => {
+            // 重複チェック（直近1分以内の記録は重複とみなす）
+            const now = Date.now();
+            if (prev.length > 0) {
+                const lastDate = new Date(prev[0].date).getTime();
+                if (now - lastDate < 60000) {
+                    return prev;
+                }
+            }
+
             // 新しい記録を先頭に追加
             const updated = [newRecord, ...prev];
             // 100件を超えたら古いものを削除
@@ -84,7 +83,7 @@ export const useHistory = () => {
             }
             return updated;
         });
-    }, [history]);
+    }, []);
 
     // ================================
     // 1件削除
