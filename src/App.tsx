@@ -4,7 +4,7 @@ import { useSettings } from './hooks/useSettings';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useHistory } from './hooks/useHistory';
 import { ProgressBar } from './components/ProgressBar';
-import { CurrentStepControl } from './components/CurrentStepControl';
+import { CurrentStepControl, LongPressButton } from './components/CurrentStepControl';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
 import { HistoryView } from './components/HistoryView';
@@ -150,7 +150,7 @@ function App() {
         </div>
       )}
 
-      <main className="container mx-auto px-4 max-w-3xl">
+      <main className={`container mx-auto max-w-3xl ${state.isActive ? 'px-2' : 'px-4'}`}>
         {isNotStarted && (
           <div className="flex flex-col items-center justify-center h-[60vh]">
             <h2 className="text-4xl font-bold mb-8 text-gray-800">準備はいいですか？</h2>
@@ -185,7 +185,7 @@ function App() {
               stepElapsedSeconds={stepElapsedSeconds}
             />
 
-            <div className="flex-grow flex flex-col items-center justify-center mt-8 space-y-8">
+            <div className="flex-grow flex flex-col items-center justify-center mt-4 space-y-4">
               {currentStep && (
                 <>
                   <CurrentStepControl
@@ -193,25 +193,38 @@ function App() {
                     stepElapsedSeconds={stepElapsedSeconds}
                     onNext={nextStep}
                     onBack={previousStep}
-                    onTogglePause={togglePause}
                     isPaused={state.isPaused}
                     isLastStep={state.currentStepIndex === steps.length - 1}
                     isFirstStep={state.currentStepIndex === 0}
                     nextStep={steps[state.currentStepIndex + 1]}
+                    className="w-full"
                   />
 
-                  <div className="flex flex-col items-center p-4 bg-white/50 rounded-xl">
-                    <div className="text-gray-500 text-sm font-medium mb-1">経過時間 / 合計予定</div>
-                    <div className="text-3xl font-bold text-gray-700 font-mono tracking-tight">
+                  <div className="flex flex-col items-center p-3 bg-white/50 rounded-xl">
+                    <div className="text-gray-500 text-xs font-medium mb-0.5">経過時間 / 合計予定</div>
+                    <div className="text-2xl font-bold text-gray-700 font-mono tracking-tight">
                       {formatTimeHMMSS(totalElapsedSeconds)}
-                      <span className="text-gray-400 mx-2 text-xl align-middle">/</span>
+                      <span className="text-gray-400 mx-2 text-lg align-middle">/</span>
                       {formatTimeHMMSS(totalDurationMinutes * 60)}
                     </div>
                   </div>
 
+                  {/* 一時停止ボタン */}
+                  <LongPressButton
+                    onAction={togglePause}
+                    progressColor={state.isPaused ? 'bg-green-300' : 'bg-gray-500'}
+                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                      state.isPaused
+                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
+                        : 'bg-gray-400/30 hover:bg-gray-400/50 text-gray-600'
+                    }`}
+                  >
+                    {state.isPaused ? '▶ 再開（長押し）' : '⏸ 一時停止（長押し）'}
+                  </LongPressButton>
+
                   <button
                     onClick={() => setShowSkipConfirm(true)}
-                    className="mt-2 px-4 py-2 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+                    className="px-4 py-1.5 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
                   >
                     強制終了（スキップ）
                   </button>

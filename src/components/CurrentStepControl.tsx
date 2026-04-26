@@ -9,18 +9,18 @@ type Props = {
     stepElapsedSeconds: number;
     onNext: () => void;
     onBack: () => void;
-    onTogglePause: () => void;
     isPaused: boolean;
     isLastStep: boolean;
     isFirstStep: boolean;
     nextStep?: Step;
+    className?: string;
 };
 
 /**
  * 長押しボタンコンポーネント
  * 押している間にプログレスバーが表示される
  */
-const LongPressButton: React.FC<{
+export const LongPressButton: React.FC<{
     onAction: () => void;
     disabled?: boolean;
     className: string;
@@ -57,11 +57,11 @@ export const CurrentStepControl: React.FC<Props> = ({
     stepElapsedSeconds,
     onNext,
     onBack,
-    onTogglePause,
     isPaused,
     isLastStep,
     isFirstStep,
     nextStep,
+    className = '',
 }) => {
     const plannedSeconds = step.durationMinutes * 60;
     const progressRatio = stepElapsedSeconds / plannedSeconds;
@@ -74,15 +74,15 @@ export const CurrentStepControl: React.FC<Props> = ({
     const bgColor = isPaused ? 'bg-gray-200' : status.bgColor;
 
     return (
-        <div className={`flex flex-col items-center justify-center p-8 rounded-3xl shadow-lg ${bgColor} transition-colors duration-500`}>
-            <div className="text-gray-500 text-lg mb-2">現在の工程</div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">{step.name}</h2>
+        <div className={`flex flex-col items-center justify-center p-5 rounded-3xl shadow-lg ${bgColor} transition-colors duration-500 ${className}`}>
+            <div className="text-gray-500 text-sm mb-1">現在の工程</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3 text-center">{step.name}</h2>
 
-            <div className={`text-8xl font-mono font-bold text-gray-900 mb-2 tracking-tighter ${isPaused ? 'animate-pulse' : ''}`}>
+            <div className={`text-7xl font-mono font-bold text-gray-900 mb-1 tracking-tighter ${isPaused ? 'animate-pulse' : ''}`}>
                 {formatTimeMMSS(stepElapsedSeconds)}
             </div>
 
-            <div className={`text-xl font-bold mb-4 ${isPaused ? 'text-gray-500' : status.color} flex items-center gap-2`}>
+            <div className={`text-lg font-bold mb-3 ${isPaused ? 'text-gray-500' : status.color} flex items-center gap-2`}>
                 {isPaused ? (
                     <span>⏸ 一時停止中</span>
                 ) : (
@@ -98,25 +98,12 @@ export const CurrentStepControl: React.FC<Props> = ({
                 )}
             </div>
 
-            {/* 一時停止/再開ボタン（長押し） */}
-            <LongPressButton
-                onAction={onTogglePause}
-                progressColor={isPaused ? 'bg-green-300' : 'bg-gray-500'}
-                className={`mb-6 px-6 py-2 rounded-full text-sm font-bold transition-all ${
-                    isPaused
-                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
-                        : 'bg-gray-400/30 hover:bg-gray-400/50 text-gray-600'
-                }`}
-            >
-                {isPaused ? '▶ 再開（長押し）' : '⏸ 一時停止（長押し）'}
-            </LongPressButton>
-
-            <div className="flex gap-4 w-full max-w-md justify-center">
+            <div className="flex gap-3 w-full max-w-md justify-center">
                 <LongPressButton
                     onAction={onBack}
                     disabled={isFirstStep}
                     progressColor="bg-gray-500"
-                    className="bg-gray-300 hover:bg-gray-400 disabled:opacity-30 text-gray-700 text-lg font-bold py-6 px-6 rounded-2xl shadow-md transition-all flex items-center gap-1"
+                    className="bg-gray-300 hover:bg-gray-400 disabled:opacity-30 text-gray-700 text-lg font-bold py-4 px-5 rounded-2xl shadow-md transition-all flex items-center gap-1"
                 >
                     <span>◀</span>
                     <span>戻る</span>
@@ -125,11 +112,11 @@ export const CurrentStepControl: React.FC<Props> = ({
                 <LongPressButton
                     onAction={onNext}
                     progressColor="bg-blue-300"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl shadow-md transition-all flex flex-col items-center justify-center gap-1"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl shadow-md transition-all flex flex-col items-center justify-center gap-0.5"
                 >
-                    <span className="text-2xl flex items-center gap-1">{isLastStep ? '終了' : '次へ'} <span>▶</span></span>
+                    <span className="text-xl flex items-center gap-1">{isLastStep ? '終了' : '次へ'} <span>▶</span></span>
                     {nextStep && (
-                        <span className="text-sm font-normal opacity-90">
+                        <span className="text-xs font-normal opacity-90">
                             次は {nextStep.name} ({nextStep.durationMinutes}分)
                         </span>
                     )}
