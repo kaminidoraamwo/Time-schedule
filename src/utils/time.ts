@@ -67,6 +67,16 @@ export const formatDurationJapanese = (seconds: number): string => {
 };
 
 /**
+ * 時刻を HH:MM 形式に変換（完了予定時刻の表示用）
+ * Used in ActiveTimerView (完了予定)
+ */
+export const formatClockTime = (date: Date): string => {
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+};
+
+/**
  * Natural language format for differences (e.g. 3分, 1分30秒)
  * Used in ProgressBar status messages
  */

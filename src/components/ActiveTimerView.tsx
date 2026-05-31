@@ -2,7 +2,7 @@ import React from 'react';
 import type { Step } from '../types';
 import { ProgressBar } from './ProgressBar';
 import { CurrentStepControl, LongPressButton } from './CurrentStepControl';
-import { formatTimeHMMSS } from '../utils/time';
+import { formatTimeHMMSS, formatClockTime } from '../utils/time';
 
 type Props = {
     steps: Step[];
@@ -31,6 +31,15 @@ export const ActiveTimerView: React.FC<Props> = ({
     onTogglePause,
     onSkipToFinish,
 }) => {
+    // 完了予定時刻 = 現在時刻 + 残り時間（現工程の残り + 以降の工程の予定合計）
+    const currentPlannedSeconds = (currentStep?.durationMinutes ?? 0) * 60;
+    const remainingCurrentStep = Math.max(0, currentPlannedSeconds - stepElapsedSeconds);
+    const futureStepsSeconds = steps
+        .slice(currentStepIndex + 1)
+        .reduce((acc, s) => acc + s.durationMinutes * 60, 0);
+    const remainingTotalSeconds = remainingCurrentStep + futureStepsSeconds;
+    const finishAt = new Date(Date.now() + remainingTotalSeconds * 1000);
+
     return (
         <div className="flex flex-col h-full">
             <ProgressBar
@@ -56,6 +65,14 @@ export const ActiveTimerView: React.FC<Props> = ({
                         />
 
                         <div className="flex flex-col items-center justify-evenly w-full flex-grow mt-6 gap-2">
+                            {/* 完了予定の時刻 */}
+                            <div className="flex items-baseline gap-3 px-5 py-2 bg-cream border border-line rounded-none">
+                                <span className="text-ink-soft text-xs">🏁 完了予定</span>
+                                <span className="text-2xl font-bold text-ink font-mono tracking-tight tabular-nums">
+                                    {formatClockTime(finishAt)}
+                                </span>
+                            </div>
+
                             <div className="flex flex-col items-center p-3 bg-cream-alt border border-line rounded-none">
                                 <div className="text-ink-soft text-xs font-medium mb-0.5">経過時間 / 合計予定</div>
                                 <div className="text-2xl font-bold text-ink font-mono tracking-tight">

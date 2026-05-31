@@ -4,6 +4,10 @@ import { formatTimeMMSS } from '../utils/time';
 import { getStepStatus } from '../utils/progressStatus';
 import { useLongPress } from '../hooks/useLongPress';
 
+// 円形プログレスリングの寸法（viewBox 220x220 / 半径95）
+const RING_RADIUS = 95;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
 type Props = {
     step: Step;
     stepElapsedSeconds: number;
@@ -66,6 +70,14 @@ export const CurrentStepControl: React.FC<Props> = ({
     const plannedSeconds = step.durationMinutes * 60;
     const progressRatio = stepElapsedSeconds / plannedSeconds;
     const overtimeSeconds = Math.max(0, stepElapsedSeconds - plannedSeconds);
+    const remainingSeconds = Math.max(0, plannedSeconds - stepElapsedSeconds);
+
+    // リングの充填率: 残り時間ぶんが満ちている。超過時は満タン(赤)で警告。
+    const ringRatio = overtimeSeconds > 0
+        ? 1
+        : plannedSeconds > 0
+            ? remainingSeconds / plannedSeconds
+            : 0;
 
     // Use shared status utility
     const status = getStepStatus(progressRatio);
@@ -78,24 +90,37 @@ export const CurrentStepControl: React.FC<Props> = ({
             <div className="text-ink-soft text-sm mb-1">現在の工程</div>
             <h2 className="text-2xl font-medium text-ink mb-3 text-center">{step.name}</h2>
 
-            <div className={`text-7xl font-mono font-bold text-ink mb-1 tracking-tighter ${isPaused ? 'animate-pulse' : ''}`}>
-                {formatTimeMMSS(stepElapsedSeconds)}
-            </div>
-
-            <div className={`text-lg font-bold mb-3 ${isPaused ? 'text-ink-soft' : status.color} flex items-center gap-2`}>
-                {isPaused ? (
-                    <span>⏸ 一時停止中</span>
-                ) : (
-                    <>
-                        <span>{status.text}</span>
-                        {overtimeSeconds > 0 && (
-                            <span>(+{formatTimeMMSS(overtimeSeconds)})</span>
-                        )}
-                        {overtimeSeconds === 0 && (
-                            <span className="text-ink-faint text-sm">/ {formatTimeMMSS(plannedSeconds)}</span>
-                        )}
-                    </>
-                )}
+            {/* 円形リング: 経過時間を主役に、残り時間ぶんのリングが減っていく */}
+            <div className={`relative w-56 h-56 mb-3 ${isPaused ? 'animate-pulse' : ''}`}>
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 220 220">
+                    <circle
+                        cx="110" cy="110" r={RING_RADIUS}
+                        fill="none" stroke="rgba(51,51,51,0.12)" strokeWidth="10"
+                    />
+                    <circle
+                        cx="110" cy="110" r={RING_RADIUS}
+                        fill="none" stroke="currentColor" strokeWidth="10"
+                        strokeDasharray={RING_CIRCUMFERENCE}
+                        strokeDashoffset={RING_CIRCUMFERENCE * (1 - ringRatio)}
+                        className={isPaused ? 'text-ink-faint' : status.color}
+                        style={{ transition: 'stroke-dashoffset 0.3s linear, stroke 0.4s' }}
+                    />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="text-xs text-ink-soft">経過</div>
+                    <div className="text-6xl font-mono font-bold text-ink leading-none tracking-tighter">
+                        {formatTimeMMSS(stepElapsedSeconds)}
+                    </div>
+                    <div className="w-12 h-px bg-line my-2" />
+                    <div className="text-sm font-mono text-ink-soft">
+                        {overtimeSeconds > 0
+                            ? `超過 +${formatTimeMMSS(overtimeSeconds)}`
+                            : `残り ${formatTimeMMSS(remainingSeconds)} / ${formatTimeMMSS(plannedSeconds)}`}
+                    </div>
+                    <div className={`text-base font-bold mt-1 ${isPaused ? 'text-ink-soft' : status.color}`}>
+                        {isPaused ? '⏸ 一時停止中' : status.text}
+                    </div>
+                </div>
             </div>
 
             <div className="flex gap-3 w-full max-w-md justify-center">
