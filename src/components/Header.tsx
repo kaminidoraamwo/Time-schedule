@@ -14,21 +14,21 @@ export const Header: React.FC<Props> = ({
     onOpenSettings
 }) => {
     return (
-        <header className={`bg-white shadow-sm py-4 px-6 flex justify-between items-center ${isActive ? 'mb-2' : 'mb-6'}`}>
-            <h1 className="text-xl font-bold text-gray-700">Salon Pacer</h1>
-            <div className="flex gap-4">
+        <header className={`bg-cream border-b border-line py-4 px-6 flex justify-between items-center ${isActive ? 'mb-2' : 'mb-6'}`}>
+            <h1 className="font-serif text-xl text-ink tracking-wide">Salon Pacer</h1>
+            <div className="flex gap-4 items-center">
                 <button
                     onClick={onToggleMute}
-                    className="text-2xl hover:scale-110 transition-transform"
+                    className="text-xl text-ink-soft hover:text-ink transition-colors"
                     title={isMuted ? "ミュート解除" : "ミュート"}
                 >
                     {isMuted ? "🔇" : "🔊"}
                 </button>
                 <button
                     onClick={onOpenSettings}
-                    className="text-gray-500 hover:text-blue-600"
+                    className="text-sm text-ink-soft hover:text-accent transition-colors"
                 >
-                    ⚙️ 設定
+                    設定
                 </button>
             </div>
         </header>

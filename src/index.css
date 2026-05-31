@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Aesop（イソップ）デザイン言語のベース設定。
+ * - 背景はシグネチャークリーム #fffef2（純白は使わない）
+ * - 本文色は #333333（純黒は使わない）
+ * - line-height 1.5 を標準とし、letter-spacing は normal のまま
+ */
+@layer base {
+  html,
+  body {
+    @apply bg-cream text-ink font-sans;
+    line-height: 1.5;
+    letter-spacing: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

@@ -56,11 +56,11 @@ export const ActiveTimerView: React.FC<Props> = ({
                         />
 
                         <div className="flex flex-col items-center justify-evenly w-full flex-grow mt-6 gap-2">
-                            <div className="flex flex-col items-center p-3 bg-white/50 rounded-xl">
-                                <div className="text-gray-500 text-xs font-medium mb-0.5">経過時間 / 合計予定</div>
-                                <div className="text-2xl font-bold text-gray-700 font-mono tracking-tight">
+                            <div className="flex flex-col items-center p-3 bg-cream-alt border border-line rounded-none">
+                                <div className="text-ink-soft text-xs font-medium mb-0.5">経過時間 / 合計予定</div>
+                                <div className="text-2xl font-bold text-ink font-mono tracking-tight">
                                     {formatTimeHMMSS(totalElapsedSeconds)}
-                                    <span className="text-gray-400 mx-2 text-lg align-middle">/</span>
+                                    <span className="text-ink-faint mx-2 text-lg align-middle">/</span>
                                     {formatTimeHMMSS(totalDurationMinutes * 60)}
                                 </div>
                             </div>
@@ -68,11 +68,11 @@ export const ActiveTimerView: React.FC<Props> = ({
                             {/* 一時停止ボタン */}
                             <LongPressButton
                                 onAction={onTogglePause}
-                                progressColor={isPaused ? 'bg-green-300' : 'bg-gray-500'}
-                                className={`px-6 py-2 rounded-full text-sm font-bold transition-all mt-2 ${
+                                progressColor={isPaused ? 'bg-cream/50' : 'bg-ink/40'}
+                                className={`px-6 py-2 rounded-none text-sm font-medium transition-colors mt-2 ${
                                     isPaused
-                                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
-                                        : 'bg-gray-400/30 hover:bg-gray-400/50 text-gray-600'
+                                        ? 'bg-forest hover:opacity-90 text-cream'
+                                        : 'bg-transparent border border-ink/40 hover:bg-ink/5 text-ink-soft'
                                 }`}
                             >
                                 {isPaused ? '▶ 再開（長押し）' : '⏸ 一時停止（長押し）'}
@@ -81,7 +81,7 @@ export const ActiveTimerView: React.FC<Props> = ({
                             <LongPressButton
                                 onAction={onSkipToFinish}
                                 progressColor="bg-red-400"
-                                className="px-4 py-1.5 border border-red-200 text-red-400 rounded-lg text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors mt-6"
+                                className="px-4 py-1.5 border border-red-300 text-red-500 rounded-none text-xs hover:bg-red-50 hover:text-red-700 hover:border-red-400 transition-colors mt-6"
                             >
                                 強制終了（長押し）
                             </LongPressButton>

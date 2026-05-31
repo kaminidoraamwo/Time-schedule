@@ -29,7 +29,7 @@ const StepSegments: React.FC<StepSegmentsProps> = ({
             <div
                 key={step.id}
                 style={{ width: `${stepWidths[index]}%` }}
-                className={`h-full border-r border-white/30 ${isClickable ? 'cursor-pointer hover:bg-white/20 transition-all' : ''
+                className={`h-full border-r border-cream/50 ${isClickable ? 'cursor-pointer hover:bg-ink/10 transition-all' : ''
                     }`}
                 onClick={isClickable ? () => onStepClick?.(step, index) : undefined}
             />
@@ -48,7 +48,7 @@ const BackgroundSegments: React.FC<BackgroundSegmentsProps> = ({ steps, stepWidt
             <div
                 key={`bg-${step.id}`}
                 style={{ width: `${stepWidths[index]}%` }}
-                className={`h-full ${index % 2 === 0 ? 'bg-gray-200' : 'bg-gray-300'}`}
+                className={`h-full ${index % 2 === 0 ? 'bg-line/40' : 'bg-line/70'}`}
             />
         ))}
     </div>
@@ -89,9 +89,9 @@ const Tooltip: React.FC<TooltipProps> = ({ step, position }) => {
             className="relative h-0 z-30"
             style={{ marginLeft: `${position}%` }}
         >
-            <div className={`absolute bottom-1 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap ${positionClass}`}>
+            <div className={`absolute bottom-1 bg-ink text-cream text-xs px-3 py-2 rounded-none whitespace-nowrap ${positionClass}`}>
                 {step.name} ({step.durationMinutes}分)
-                <div className={`absolute top-full border-4 border-transparent border-t-gray-800 ${arrowClass}`} />
+                <div className={`absolute top-full border-4 border-transparent border-t-ink ${arrowClass}`} />
             </div>
         </div>
     );
@@ -128,7 +128,7 @@ export const ProgressBar: React.FC<Props> = ({
     return (
         <div className="w-full mt-4 mb-3">
             {/* Time labels */}
-            <div className="flex justify-between text-xs text-gray-500 mb-2">
+            <div className="flex justify-between text-xs text-ink-soft mb-2">
                 <span>開始</span>
                 <span>{Math.floor(totalDurationMinutes / 60)}時間 {totalDurationMinutes % 60}分</span>
             </div>
@@ -140,8 +140,8 @@ export const ProgressBar: React.FC<Props> = ({
             <div className="space-y-2">
                 {/* Schedule Bar (予定) */}
                 <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 w-8 text-right font-medium">予定</span>
-                    <div className="flex-1 relative h-6 rounded-full overflow-hidden">
+                    <span className="text-xs text-ink-soft w-8 text-right font-medium">予定</span>
+                    <div className="flex-1 relative h-6 rounded-none overflow-hidden">
                         <BackgroundSegments steps={steps} stepWidths={stepWidths} />
                         <ProgressFill percent={scheduleProgressPercent} colorClass={scheduleBarColor} />
                         <StepSegments
@@ -155,8 +155,8 @@ export const ProgressBar: React.FC<Props> = ({
 
                 {/* Actual Bar (実際) */}
                 <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 w-8 text-right font-medium">実際</span>
-                    <div className="flex-1 relative h-6 rounded-full overflow-hidden">
+                    <span className="text-xs text-ink-soft w-8 text-right font-medium">実際</span>
+                    <div className="flex-1 relative h-6 rounded-none overflow-hidden">
                         <BackgroundSegments steps={steps} stepWidths={stepWidths} />
                         <ProgressFill percent={actualProgressPercent} colorClass={status.barColor} />
                         <StepSegments steps={steps} stepWidths={stepWidths} />
@@ -165,7 +165,7 @@ export const ProgressBar: React.FC<Props> = ({
             </div>
 
             {/* Status Message */}
-            <div className={`mt-3 px-4 py-2 rounded-lg ${status.bgColor} ${status.textColor} text-sm font-medium text-center`}>
+            <div className={`mt-3 px-4 py-2 rounded-none ${status.bgColor} ${status.textColor} text-sm font-medium text-center`}>
                 {status.message}
             </div>
         </div>

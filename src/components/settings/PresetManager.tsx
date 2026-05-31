@@ -23,8 +23,8 @@ export const PresetManager: React.FC<Props> = ({
     };
 
     return (
-        <div className="mb-8 bg-blue-50 p-4 rounded-lg border border-blue-100">
-            <h3 className="text-lg font-bold text-blue-800 mb-3">プリセット</h3>
+        <div className="mb-8 bg-cream-alt p-4 rounded-none border border-line">
+            <h3 className="font-serif text-lg text-ink mb-3">プリセット</h3>
 
             <div className="flex gap-2 mb-4">
                 <input
@@ -32,12 +32,12 @@ export const PresetManager: React.FC<Props> = ({
                     value={newPresetName}
                     onChange={(e) => setNewPresetName(e.target.value)}
                     placeholder="新しいプリセット名..."
-                    className="flex-1 px-3 py-2 border border-blue-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 bg-cream border border-line rounded-none focus:outline-none focus:ring-1 focus:ring-ink"
                 />
                 <button
                     onClick={handleSavePreset}
                     disabled={!newPresetName.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-bold py-2 px-4 rounded shadow"
+                    className="bg-ink hover:opacity-90 disabled:bg-ink-faint disabled:opacity-100 text-cream font-medium py-2 px-4 rounded-none transition-opacity"
                 >
                     保存
                 </button>
@@ -46,18 +46,18 @@ export const PresetManager: React.FC<Props> = ({
             {presets.length > 0 && (
                 <div className="space-y-2">
                     {presets.map(preset => (
-                        <div key={preset.id} className="flex justify-between items-center bg-white p-2 rounded border border-blue-100">
-                            <span className="font-medium text-gray-700">{preset.name}</span>
+                        <div key={preset.id} className="flex justify-between items-center bg-cream p-2 rounded-none border border-line">
+                            <span className="font-medium text-ink">{preset.name}</span>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => onLoadPreset(preset.id)}
-                                    className="text-sm bg-green-100 hover:bg-green-200 text-green-800 py-1 px-3 rounded"
+                                    className="text-sm border border-forest/50 hover:bg-forest/5 text-forest py-1 px-3 rounded-none transition-colors"
                                 >
                                     読込
                                 </button>
                                 <button
                                     onClick={() => onDeletePreset(preset.id)}
-                                    className="text-sm bg-red-100 hover:bg-red-200 text-red-800 py-1 px-3 rounded"
+                                    className="text-sm border border-red-200 hover:bg-red-50 text-red-500 py-1 px-3 rounded-none transition-colors"
                                 >
                                     削除
                                 </button>

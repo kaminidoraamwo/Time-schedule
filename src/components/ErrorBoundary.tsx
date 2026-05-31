@@ -32,22 +32,22 @@ export class ErrorBoundary extends Component<Props, State> {
     public render() {
         if (this.state.hasError) {
             return (
-                <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-                    <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full text-center">
+                <div className="min-h-screen flex items-center justify-center bg-cream p-4">
+                    <div className="bg-cream border border-line rounded-none p-8 max-w-md w-full text-center">
                         <div className="text-6xl mb-4">😢</div>
-                        <h1 className="text-xl font-bold text-gray-800 mb-2">予期せぬエラーが発生しました</h1>
-                        <p className="text-gray-600 mb-6 text-sm">
+                        <h1 className="font-serif text-xl text-ink mb-2">予期せぬエラーが発生しました</h1>
+                        <p className="text-ink-soft mb-6 text-sm">
                             申し訳ありません。アプリに問題が発生しました。<br />
                             再読み込みを試してください。
                         </p>
 
-                        <div className="bg-red-50 text-red-600 p-3 rounded mb-6 text-xs text-left overflow-auto max-h-32">
+                        <div className="bg-red-50 text-red-600 p-3 rounded-none mb-6 text-xs text-left overflow-auto max-h-32">
                             {this.state.error?.toString()}
                         </div>
 
                         <button
                             onClick={this.handleReset}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full transition-colors"
+                            className="bg-ink hover:opacity-90 text-cream font-medium py-3 px-6 rounded-none w-full transition-opacity"
                         >
                             アプリを再読み込み
                         </button>

@@ -35,30 +35,30 @@ export const SummaryView: React.FC<Props> = ({
     const isLate = totalDiff > 0;
 
     return (
-        <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <div className="max-w-2xl mx-auto p-6 bg-cream border border-line rounded-none">
             {/* 完了時刻 */}
-            <h2 className="text-lg font-bold mb-4 text-center">{formatDateJapanese(new Date())}</h2>
+            <h2 className="font-serif text-xl mb-4 text-center text-ink">{formatDateJapanese(new Date())}</h2>
 
             {finishReason === 'skipped' && (
-                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center text-yellow-700 text-sm">
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-none text-center text-yellow-700 text-sm">
                     ⚠️ 強制終了のため、履歴には保存されません
                 </div>
             )}
 
             {/* サマリーセクション */}
-            <div className="p-4 bg-gray-50 rounded-lg mb-4">
+            <div className="p-4 bg-cream-alt border border-line rounded-none mb-4">
                 <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                        <div className="text-sm text-gray-500">予定</div>
-                        <div className="text-lg font-bold">{formatTimeJapanese(totalPlanned)}</div>
+                        <div className="text-sm text-ink-soft">予定</div>
+                        <div className="text-lg font-bold text-ink">{formatTimeJapanese(totalPlanned)}</div>
                     </div>
                     <div>
-                        <div className="text-sm text-gray-500">実績</div>
-                        <div className="text-lg font-bold">{formatTimeJapanese(totalActual)}</div>
+                        <div className="text-sm text-ink-soft">実績</div>
+                        <div className="text-lg font-bold text-ink">{formatTimeJapanese(totalActual)}</div>
                     </div>
                     <div>
-                        <div className="text-sm text-gray-500">差分</div>
-                        <div className={`text-lg font-bold ${isLate ? 'text-red-500' : 'text-green-500'}`}>
+                        <div className="text-sm text-ink-soft">差分</div>
+                        <div className={`text-lg font-bold ${isLate ? 'text-red-500' : 'text-green-600'}`}>
                             {isLate ? '+' : ''}{formatTimeJapanese(totalDiff)}
                         </div>
                     </div>
@@ -69,7 +69,7 @@ export const SummaryView: React.FC<Props> = ({
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="border-b text-sm text-gray-500">
+                        <tr className="border-b border-line text-sm text-ink-soft">
                             <th className="py-2 pl-2">No.</th>
                             <th className="py-2">工程名</th>
                             <th className="py-2 text-right">予定</th>
@@ -84,12 +84,12 @@ export const SummaryView: React.FC<Props> = ({
                             const stepIsLate = diff > 0;
 
                             return (
-                                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                                    <td className="py-3 pl-2 text-gray-500">{index + 1}</td>
-                                    <td className="py-3 text-sm font-medium text-gray-700">{step?.name || `Step ${record.stepId}`}</td>
-                                    <td className="py-3 text-right text-sm text-gray-500">{formatTimeJapanese(record.plannedDuration)}</td>
-                                    <td className="py-3 text-right text-sm font-mono">{formatTimeJapanese(record.actualDuration)}</td>
-                                    <td className={`py-3 text-right text-sm font-medium pr-2 ${stepIsLate ? 'text-red-500' : 'text-green-500'}`}>
+                                <tr key={index} className="border-b border-line/50 hover:bg-cream-alt">
+                                    <td className="py-3 pl-2 text-ink-soft">{index + 1}</td>
+                                    <td className="py-3 text-sm font-medium text-ink">{step?.name || `Step ${record.stepId}`}</td>
+                                    <td className="py-3 text-right text-sm text-ink-soft">{formatTimeJapanese(record.plannedDuration)}</td>
+                                    <td className="py-3 text-right text-sm font-mono text-ink">{formatTimeJapanese(record.actualDuration)}</td>
+                                    <td className={`py-3 text-right text-sm font-medium pr-2 ${stepIsLate ? 'text-red-500' : 'text-green-600'}`}>
                                         {stepIsLate ? '+' : ''}{formatTimeJapanese(diff)}
                                     </td>
                                 </tr>
@@ -102,7 +102,7 @@ export const SummaryView: React.FC<Props> = ({
             <div className="mt-8 text-center">
                 <button
                     onClick={onReset}
-                    className="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors"
+                    className="bg-ink hover:opacity-90 text-cream font-medium py-3 px-8 rounded-none transition-opacity"
                 >
                     新しいセッションを開始
                 </button>

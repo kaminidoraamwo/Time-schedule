@@ -70,19 +70,19 @@ export const CurrentStepControl: React.FC<Props> = ({
     // Use shared status utility
     const status = getStepStatus(progressRatio);
 
-    // 一時停止中は背景をグレーに
-    const bgColor = isPaused ? 'bg-gray-200' : status.bgColor;
+    // 一時停止中は背景をクリームに
+    const bgColor = isPaused ? 'bg-cream-alt' : status.bgColor;
 
     return (
-        <div className={`flex flex-col items-center justify-center p-5 rounded-3xl shadow-lg ${bgColor} transition-colors duration-500 ${className}`}>
-            <div className="text-gray-500 text-sm mb-1">現在の工程</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-3 text-center">{step.name}</h2>
+        <div className={`flex flex-col items-center justify-center p-5 rounded-none border border-line ${bgColor} transition-colors duration-500 ${className}`}>
+            <div className="text-ink-soft text-sm mb-1">現在の工程</div>
+            <h2 className="text-2xl font-medium text-ink mb-3 text-center">{step.name}</h2>
 
-            <div className={`text-7xl font-mono font-bold text-gray-900 mb-1 tracking-tighter ${isPaused ? 'animate-pulse' : ''}`}>
+            <div className={`text-7xl font-mono font-bold text-ink mb-1 tracking-tighter ${isPaused ? 'animate-pulse' : ''}`}>
                 {formatTimeMMSS(stepElapsedSeconds)}
             </div>
 
-            <div className={`text-lg font-bold mb-3 ${isPaused ? 'text-gray-500' : status.color} flex items-center gap-2`}>
+            <div className={`text-lg font-bold mb-3 ${isPaused ? 'text-ink-soft' : status.color} flex items-center gap-2`}>
                 {isPaused ? (
                     <span>⏸ 一時停止中</span>
                 ) : (
@@ -92,7 +92,7 @@ export const CurrentStepControl: React.FC<Props> = ({
                             <span>(+{formatTimeMMSS(overtimeSeconds)})</span>
                         )}
                         {overtimeSeconds === 0 && (
-                            <span className="text-gray-400 text-sm">/ {formatTimeMMSS(plannedSeconds)}</span>
+                            <span className="text-ink-faint text-sm">/ {formatTimeMMSS(plannedSeconds)}</span>
                         )}
                     </>
                 )}
@@ -102,8 +102,8 @@ export const CurrentStepControl: React.FC<Props> = ({
                 <LongPressButton
                     onAction={onBack}
                     disabled={isFirstStep}
-                    progressColor="bg-gray-500"
-                    className="bg-gray-300 hover:bg-gray-400 disabled:opacity-30 text-gray-700 text-lg font-bold py-4 px-5 rounded-2xl shadow-md transition-all flex items-center gap-1"
+                    progressColor="bg-ink/40"
+                    className="bg-transparent border border-ink/40 hover:bg-ink/5 disabled:opacity-30 text-ink text-lg font-medium py-4 px-5 rounded-none transition-colors flex items-center gap-1"
                 >
                     <span>◀</span>
                     <span>戻る</span>
@@ -111,8 +111,8 @@ export const CurrentStepControl: React.FC<Props> = ({
 
                 <LongPressButton
                     onAction={onNext}
-                    progressColor="bg-blue-300"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl shadow-md transition-all flex flex-col items-center justify-center gap-0.5"
+                    progressColor="bg-cream/50"
+                    className="flex-1 bg-ink hover:opacity-90 text-cream font-medium py-3 px-6 rounded-none transition-opacity flex flex-col items-center justify-center gap-0.5"
                 >
                     <span className="text-xl flex items-center gap-1">{isLastStep ? '終了' : '次へ'} <span>▶</span></span>
                     {nextStep && (

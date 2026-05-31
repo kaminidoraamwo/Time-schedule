@@ -77,11 +77,11 @@ export const Settings: React.FC<SettingsProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                    <h2 className="text-2xl font-bold text-gray-800">設定</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        <div className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4">
+            <div className="bg-cream border border-line rounded-none w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="p-6 border-b border-line flex justify-between items-center">
+                    <h2 className="font-serif text-2xl text-ink">設定</h2>
+                    <button onClick={onClose} className="text-ink-faint hover:text-ink text-2xl transition-colors">&times;</button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6">
@@ -104,20 +104,20 @@ export const Settings: React.FC<SettingsProps> = ({
 
                     <TotalDuration
                         steps={steps}
-                        className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200"
+                        className="mt-6 p-4 bg-cream-alt rounded-none border border-line"
                     />
                 </div>
 
-                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-between items-center">
+                <div className="p-6 border-t border-line bg-cream-alt flex justify-between items-center">
                     <button
                         onClick={handleResetRequest}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                        className="text-red-500 hover:text-red-700 text-sm font-medium underline underline-offset-2 transition-colors"
                     >
                         デフォルトに戻す
                     </button>
                     <button
                         onClick={onClose}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow"
+                        className="bg-ink hover:opacity-90 text-cream font-medium py-2 px-8 rounded-none transition-opacity"
                     >
                         完了
                     </button>
@@ -126,10 +126,10 @@ export const Settings: React.FC<SettingsProps> = ({
 
             {/* Confirmation Modal */}
             {confirmState && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
-                        <h3 className="text-lg font-bold text-gray-800 mb-2">確認</h3>
-                        <p className="text-gray-600 mb-6 whitespace-pre-line">
+                <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-[60] p-4">
+                    <div className="bg-cream border border-line rounded-none p-6 max-w-sm w-full mx-4">
+                        <h3 className="font-serif text-lg text-ink mb-2">確認</h3>
+                        <p className="text-ink-soft mb-6 whitespace-pre-line">
                             {confirmState.type === 'RESET' && '設定を初期状態に戻しますか？'}
                             {confirmState.type === 'LOAD' && `プリセット「${confirmState.presetName}」を読み込みますか？\n現在の設定は上書きされます。`}
                             {confirmState.type === 'DELETE' && 'このプリセットを削除しますか？'}
@@ -137,13 +137,13 @@ export const Settings: React.FC<SettingsProps> = ({
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setConfirmState(null)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-ink-soft hover:bg-cream-alt rounded-none transition-colors"
                             >
                                 キャンセル
                             </button>
                             <button
                                 onClick={executeAction}
-                                className={`px-4 py-2 text-white rounded-lg transition-colors shadow-sm ${confirmState.type === 'LOAD' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-500 hover:bg-red-600'
+                                className={`px-4 py-2 text-cream rounded-none transition-opacity hover:opacity-90 ${confirmState.type === 'LOAD' ? 'bg-forest' : 'bg-red-500'
                                     }`}
                             >
                                 {confirmState.type === 'LOAD' ? '読み込む' : '実行する'}
