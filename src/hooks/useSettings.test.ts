@@ -48,3 +48,39 @@ describe('useSettings.applyTemplate', () => {
     expect(result.current.steps).toEqual(before);
   });
 });
+
+describe('useSettings.duplicateStep', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('inserts a copy directly after the source step with a fresh id', () => {
+    const { result } = renderHook(() => useSettings());
+    act(() => result.current.applyTemplate('tpl-treatment')); // 5工程
+    const target = result.current.steps[1];
+
+    act(() => result.current.duplicateStep(target.id));
+
+    const ids = result.current.steps.map((s) => s.id);
+    expect(result.current.steps).toHaveLength(6);
+    // コピーは直後に入る
+    expect(result.current.steps[2].name).toBe(target.name);
+    expect(result.current.steps[2].durationMinutes).toBe(target.durationMinutes);
+    // id は衝突しない
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('useSettings.addNamedStep', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('appends a step with the given name and the previous step duration as default', () => {
+    const { result } = renderHook(() => useSettings());
+    act(() => result.current.applyTemplate('tpl-treatment'));
+    const lastDuration = result.current.steps[result.current.steps.length - 1].durationMinutes;
+
+    act(() => result.current.addNamedStep('カット'));
+
+    const added = result.current.steps[result.current.steps.length - 1];
+    expect(added.name).toBe('カット');
+    expect(added.durationMinutes).toBe(lastDuration);
+  });
+});

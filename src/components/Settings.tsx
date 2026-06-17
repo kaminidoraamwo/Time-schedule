@@ -23,6 +23,8 @@ type SettingsProps = {
     onLoadPreset: (id: string) => void;
     onDeletePreset: (id: string) => void;
     onApplyTemplate: (id: string) => void;
+    onDuplicateStep: (id: number) => void;
+    onAddNamedStep: (name: string) => void;
 };
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -39,6 +41,8 @@ export const Settings: React.FC<SettingsProps> = ({
     onLoadPreset,
     onDeletePreset,
     onApplyTemplate,
+    onDuplicateStep,
+    onAddNamedStep,
 }) => {
     // Confirmation State
     const [confirmState, setConfirmState] = useState<{
@@ -126,6 +130,8 @@ export const Settings: React.FC<SettingsProps> = ({
                         onAddStep={onAddStep}
                         onRemoveStep={onRemoveStep}
                         onMoveStep={onMoveStep}
+                        onDuplicateStep={onDuplicateStep}
+                        onAddNamedStep={onAddNamedStep}
                     />
                 </div>
 

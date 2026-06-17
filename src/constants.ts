@@ -11,6 +11,12 @@ export const STORAGE_KEYS = {
 // 履歴の最大保存件数
 export const MAX_HISTORY_COUNT = 100;
 
+// 工程編集でよく使う時間チップ（分）
+export const QUICK_DURATIONS = [5, 10, 15, 20, 30, 45, 60];
+
+// 「よく使う工程から追加」のプリセット名
+export const STEP_PRESET_NAMES = ['カウンセリング', 'シャンプー', '薬剤塗布', '薬剤放置', '中間処理', 'ドライヤー', 'アイロン', '２液', '仕上げ・撮影'];
+
 export const SCHEDULE_STEPS: Step[] = [
   { id: 1, name: 'カウンセリング', durationMinutes: 20 },
   { id: 2, name: 'シャンプー', durationMinutes: 10 },

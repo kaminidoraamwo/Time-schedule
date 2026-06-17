@@ -27,7 +27,9 @@ function App() {
     savePreset,
     loadPreset,
     deletePreset,
-    applyTemplate
+    applyTemplate,
+    duplicateStep,
+    addNamedStep
   } = useSettings();
 
   const {
@@ -86,6 +88,8 @@ function App() {
         onLoadPreset={loadPreset}
         onDeletePreset={deletePreset}
         onApplyTemplate={applyTemplate}
+        onDuplicateStep={duplicateStep}
+        onAddNamedStep={addNamedStep}
       />
 
       {/* 履歴画面 */}

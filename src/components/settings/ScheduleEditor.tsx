@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Step } from '../../types';
+import { QUICK_DURATIONS, STEP_PRESET_NAMES } from '../../constants';
 
 type Props = {
     steps: Step[];
@@ -8,6 +9,8 @@ type Props = {
     onAddStep: () => void;
     onRemoveStep: (id: number) => void;
     onMoveStep: (index: number, direction: 'up' | 'down') => void;
+    onDuplicateStep?: (id: number) => void;
+    onAddNamedStep?: (name: string) => void;
 };
 
 export const ScheduleEditor: React.FC<Props> = ({
@@ -16,7 +19,9 @@ export const ScheduleEditor: React.FC<Props> = ({
     onUpdateStep,
     onAddStep,
     onRemoveStep,
-    onMoveStep
+    onMoveStep,
+    onDuplicateStep,
+    onAddNamedStep
 }) => {
     return (
         <div>
@@ -57,10 +62,30 @@ export const ScheduleEditor: React.FC<Props> = ({
                                 </div>
                             </div>
 
-                            {/* Row 2: Duration Controls and Delete */}
+                            {/* Row 2a: 時間チップ（ワンタップ） */}
+                            <div className="pl-8">
+                                <label className="block text-xs text-ink-soft mb-1">時間設定 (分)</label>
+                                <div className="flex flex-wrap gap-1.5 mb-2">
+                                    {QUICK_DURATIONS.map((d) => (
+                                        <button
+                                            key={d}
+                                            onClick={() => onUpdateStep(step.id, 'durationMinutes', d)}
+                                            className={`px-2.5 py-1 rounded-none border text-sm transition-colors ${
+                                                step.durationMinutes === d
+                                                    ? 'bg-ink text-cream border-ink'
+                                                    : 'bg-cream border-line text-ink-soft hover:border-ink'
+                                            }`}
+                                        >
+                                            {d}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Row 2b: 微調整と複製・削除 */}
                             <div className="flex items-end gap-4 pl-8">
                                 <div>
-                                    <label className="block text-xs text-ink-soft mb-1">時間設定 (分)</label>
+                                    <label className="block text-xs text-ink-soft mb-1">微調整</label>
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => {
@@ -90,17 +115,19 @@ export const ScheduleEditor: React.FC<Props> = ({
                                         >
                                             +
                                         </button>
-
-                                        <button
-                                            onClick={() => onUpdateStep(step.id, 'durationMinutes', step.durationMinutes + 5)}
-                                            className="bg-transparent border border-accent/50 hover:bg-accent/5 text-accent w-10 h-10 rounded-none ml-1 flex items-center justify-center font-bold text-sm active:translate-y-0.5 transition-all"
-                                        >
-                                            +5
-                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="h-10 flex items-center">
+                                <div className="h-10 flex items-center gap-1">
+                                    {onDuplicateStep && (
+                                        <button
+                                            onClick={() => onDuplicateStep(step.id)}
+                                            className="text-ink-soft hover:text-ink hover:bg-cream p-2 rounded-none transition-colors w-10 h-full flex items-center justify-center"
+                                            title="複製"
+                                        >
+                                            ⧉
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => onRemoveStep(step.id)}
                                         className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-none transition-colors w-10 h-full flex items-center justify-center"
@@ -128,6 +155,23 @@ export const ScheduleEditor: React.FC<Props> = ({
             >
                 + ステップを追加
             </button>
+
+            {onAddNamedStep && (
+                <div className="mt-4">
+                    <p className="text-xs text-ink-soft mb-2">よく使う工程から追加</p>
+                    <div className="flex flex-wrap gap-2">
+                        {STEP_PRESET_NAMES.map((name) => (
+                            <button
+                                key={name}
+                                onClick={() => onAddNamedStep(name)}
+                                className="px-3 py-1.5 rounded-none border border-line text-sm text-ink-soft bg-cream hover:border-ink hover:text-ink transition-colors"
+                            >
+                                ＋ {name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

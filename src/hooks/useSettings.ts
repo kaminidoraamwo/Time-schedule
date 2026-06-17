@@ -51,6 +51,25 @@ export const useSettings = () => {
         setSteps(prev => prev.filter(s => s.id !== id));
     }, []);
 
+    const duplicateStep = useCallback((id: number) => {
+        setSteps(prev => {
+            const index = prev.findIndex(s => s.id === id);
+            if (index === -1) return prev;
+            const newId = Math.max(...prev.map(s => s.id), 0) + 1;
+            const copy = { ...prev[index], id: newId };
+            return [...prev.slice(0, index + 1), copy, ...prev.slice(index + 1)];
+        });
+    }, []);
+
+    const addNamedStep = useCallback((name: string) => {
+        setSteps(prev => {
+            const newId = Math.max(...prev.map(s => s.id), 0) + 1;
+            // スマートデフォルト: 直前工程の分数をプリフィル（無ければ10分）
+            const defaultDuration = prev.length > 0 ? prev[prev.length - 1].durationMinutes : 10;
+            return [...prev, { id: newId, name, durationMinutes: defaultDuration }];
+        });
+    }, []);
+
     const moveStep = useCallback((index: number, direction: 'up' | 'down') => {
         setSteps(prev => {
             const newSteps = [...prev];
@@ -108,6 +127,8 @@ export const useSettings = () => {
         savePreset,
         loadPreset,
         deletePreset,
-        applyTemplate
+        applyTemplate,
+        duplicateStep,
+        addNamedStep
     };
 };
