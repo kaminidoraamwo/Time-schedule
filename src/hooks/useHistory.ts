@@ -50,10 +50,11 @@ export const useHistory = () => {
 
         // 工程名を含めた記録を作成
         const stepsWithName: StepRecordWithName[] = completedSteps.map(record => {
-            const step = steps.find(s => s.id === record.stepId);
+            // 記録時のスナップショット名を優先（後からの改名/読込でズレない）
+            const stepName = record.stepName ?? steps.find(s => s.id === record.stepId)?.name ?? `工程${record.stepId}`;
             return {
                 ...record,
-                stepName: step?.name || `工程${record.stepId}`,
+                stepName,
             };
         });
 

@@ -1,8 +1,8 @@
-import type { TimerState, StepRecord } from '../types';
+import type { TimerState, StepRecord, Step } from '../types';
 
 // === Action Types ===
 export type TimerAction =
-    | { type: 'START'; payload: { currentTime: number } }
+    | { type: 'START'; payload: { currentTime: number; steps: Step[] } }
     | { type: 'NEXT_STEP'; payload: { currentTime: number; newRecord: StepRecord; isLastStep: boolean } }
     | { type: 'PREVIOUS_STEP'; payload: { restoredStartTime: number } }
     | { type: 'SKIP_TO_FINISH'; payload: { stepsLength: number } }
@@ -23,6 +23,7 @@ export const INITIAL_TIMER_STATE: TimerState = {
     isPaused: false,
     pausedAt: null,
     totalPausedMs: 0,
+    workingSteps: [],
 };
 
 // === Reducer ===
@@ -30,7 +31,7 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
     switch (action.type) {
         case 'START': {
             if (state.isActive) return state;
-            const { currentTime } = action.payload;
+            const { currentTime, steps } = action.payload;
             return {
                 ...state,
                 isActive: true,
@@ -40,6 +41,8 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 isPaused: false,
                 pausedAt: null,
                 totalPausedMs: 0,
+                // START時に工程をディープコピーで固定（セッション中の真実源）
+                workingSteps: steps.map(step => ({ ...step })),
             };
         }
 

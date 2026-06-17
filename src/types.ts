@@ -15,6 +15,7 @@ export type StepRecord = {
   plannedDuration: number; // Seconds
   actualDuration: number; // Seconds
   difference: number;
+  stepName?: string; // 任意: 記録時の工程名スナップショット（後からの改名/読込で履歴名がズレるのを防ぐ）
 };
 
 // 履歴保存用（工程名を含む）
@@ -35,6 +36,7 @@ export type TimerState = {
   isPaused: boolean;
   pausedAt: number | null;
   totalPausedMs: number;
+  workingSteps?: Step[]; // 任意: START時に固定する工程のワーキングコピー。セッション中の真実源
 };
 
 // === History Types ===

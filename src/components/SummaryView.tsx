@@ -79,14 +79,14 @@ export const SummaryView: React.FC<Props> = ({
                     </thead>
                     <tbody>
                         {completedSteps.map((record, index) => {
-                            const step = steps.find(s => s.id === record.stepId);
+                            const stepName = record.stepName ?? steps.find(s => s.id === record.stepId)?.name ?? `Step ${record.stepId}`;
                             const diff = record.actualDuration - record.plannedDuration;
                             const stepIsLate = diff > 0;
 
                             return (
                                 <tr key={index} className="border-b border-line/50 hover:bg-cream-alt">
                                     <td className="py-3 pl-2 text-ink-soft">{index + 1}</td>
-                                    <td className="py-3 text-sm font-medium text-ink">{step?.name || `Step ${record.stepId}`}</td>
+                                    <td className="py-3 text-sm font-medium text-ink">{stepName}</td>
                                     <td className="py-3 text-right text-sm text-ink-soft">{formatTimeJapanese(record.plannedDuration)}</td>
                                     <td className="py-3 text-right text-sm font-mono text-ink">{formatTimeJapanese(record.actualDuration)}</td>
                                     <td className={`py-3 text-right text-sm font-medium pr-2 ${stepIsLate ? 'text-red-500' : 'text-green-600'}`}>

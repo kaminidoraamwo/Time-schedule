@@ -23,6 +23,11 @@ export const useTimer = (steps: Step[]) => {
     const hasPlayedChime = useRef(false);
     const hasPlayedFinish = useRef(false);
 
+    // セッション中の真実源: START時に固定した workingSteps を優先。
+    // 旧データや未開始時は live steps にフォールバック（後方互換）。
+    const hasWorkingSteps = !!(state.workingSteps && state.workingSteps.length > 0);
+    const activeSteps = hasWorkingSteps ? state.workingSteps! : steps;
+
     // Persist state to localStorage
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -40,17 +45,18 @@ export const useTimer = (steps: Step[]) => {
     // === Actions ===
     const start = useCallback(() => {
         initAudio();
-        dispatch({ type: 'START', payload: { currentTime: Date.now() } });
-    }, [initAudio]);
+        // live steps をディープコピーしてスナップショット（編集が進行中セッションを壊さない）
+        dispatch({ type: 'START', payload: { currentTime: Date.now(), steps: steps.map(s => ({ ...s })) } });
+    }, [initAudio, steps]);
 
     const nextStep = useCallback(() => {
-        if (!state.isActive || state.currentStepIndex >= steps.length) return;
+        if (!state.isActive || state.currentStepIndex >= activeSteps.length) return;
 
         const currentTime = Date.now();
         const rawDuration = (currentTime - (state.stepStartTime || currentTime)) / 1000;
         const pausedSeconds = state.totalPausedMs / 1000;
         const actualDuration = rawDuration - pausedSeconds;
-        const currentStep = steps[state.currentStepIndex];
+        const currentStep = activeSteps[state.currentStepIndex];
         const plannedDuration = currentStep ? currentStep.durationMinutes * 60 : 0;
 
         const newRecord: StepRecord = {
@@ -58,6 +64,7 @@ export const useTimer = (steps: Step[]) => {
             plannedDuration,
             actualDuration,
             difference: actualDuration - plannedDuration,
+            stepName: currentStep ? currentStep.name : undefined, // 記録時に工程名を焼き込む（R5）
         };
 
         // Reset audio flags for new step
@@ -65,10 +72,10 @@ export const useTimer = (steps: Step[]) => {
         hasPlayedFinish.current = false;
 
         // 最後のステップかどうかを判定
-        const isLastStep = state.currentStepIndex === steps.length - 1;
+        const isLastStep = state.currentStepIndex === activeSteps.length - 1;
 
         dispatch({ type: 'NEXT_STEP', payload: { currentTime, newRecord, isLastStep } });
-    }, [steps, state.isActive, state.currentStepIndex, state.stepStartTime, state.totalPausedMs]);
+    }, [activeSteps, state.isActive, state.currentStepIndex, state.stepStartTime, state.totalPausedMs]);
 
     const previousStep = useCallback(() => {
         if (state.currentStepIndex <= 0) return;
@@ -88,8 +95,8 @@ export const useTimer = (steps: Step[]) => {
     }, []);
 
     const skipToFinish = useCallback(() => {
-        dispatch({ type: 'SKIP_TO_FINISH', payload: { stepsLength: steps.length } });
-    }, [steps.length]);
+        dispatch({ type: 'SKIP_TO_FINISH', payload: { stepsLength: activeSteps.length } });
+    }, [activeSteps.length]);
 
     const dismissStaleSession = useCallback(() => {
         dispatch({ type: 'DISMISS_STALE' });
@@ -105,8 +112,8 @@ export const useTimer = (steps: Step[]) => {
     }, [state.isPaused]);
 
     // === Computed Values ===
-    const isFinished = state.currentStepIndex >= steps.length;
-    const currentStep = isFinished ? null : steps[state.currentStepIndex];
+    const isFinished = state.currentStepIndex >= activeSteps.length;
+    const currentStep = isFinished ? null : activeSteps[state.currentStepIndex];
 
     // 一時停止中は pausedAt 時点で止める、経過時間から一時停止分を差し引く
     const effectiveNow = state.isPaused ? (state.pausedAt || now) : now;
@@ -142,6 +149,7 @@ export const useTimer = (steps: Step[]) => {
     return {
         state,
         now,
+        activeSteps,
         currentStep,
         totalElapsedSeconds,
         stepElapsedSeconds,

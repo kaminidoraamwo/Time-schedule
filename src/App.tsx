@@ -32,6 +32,7 @@ function App() {
 
   const {
     state,
+    activeSteps,
     currentStep,
     totalElapsedSeconds,
     stepElapsedSeconds,
@@ -55,6 +56,8 @@ function App() {
   const isNotStarted = !state.isActive && state.currentStepIndex === 0 && !isFinished;
   const totalDurationMinutes = getTotalDurationMinutes(steps);
   const canStart = validateSchedule(steps).isValid;
+  // 進行中/完了サマリーは固定済みの activeSteps を真実源にする（設定編集の影響を受けない）
+  const activeTotalDurationMinutes = getTotalDurationMinutes(activeSteps);
 
   return (
     <div className="min-h-screen bg-cream text-ink font-sans">
@@ -100,7 +103,7 @@ function App() {
               前回のセッションは24時間以上経過したためリセットされます。
             </p>
             <p className="text-sm text-ink-faint mb-6">
-              工程 {state.currentStepIndex + 1} / {steps.length}（{steps[state.currentStepIndex]?.name || '不明'}）まで進んでいました。
+              工程 {state.currentStepIndex + 1} / {activeSteps.length}（{activeSteps[state.currentStepIndex]?.name || '不明'}）まで進んでいました。
             </p>
             <button
               onClick={dismissStaleSession}
@@ -125,13 +128,13 @@ function App() {
 
         {state.isActive && (
           <ActiveTimerView
-            steps={steps}
+            steps={activeSteps}
             currentStepIndex={state.currentStepIndex}
             currentStep={currentStep || undefined}
             totalElapsedSeconds={totalElapsedSeconds}
             stepElapsedSeconds={stepElapsedSeconds}
             isPaused={state.isPaused}
-            totalDurationMinutes={totalDurationMinutes}
+            totalDurationMinutes={activeTotalDurationMinutes}
             onNextStep={nextStep}
             onPreviousStep={previousStep}
             onTogglePause={togglePause}
@@ -141,7 +144,7 @@ function App() {
 
         {isFinished && (
           <SummaryView
-            steps={steps}
+            steps={activeSteps}
             completedSteps={state.completedSteps}
             onReset={reset}
             finishReason={state.finishReason}
