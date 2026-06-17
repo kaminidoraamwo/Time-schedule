@@ -32,9 +32,11 @@ export const useProgressCalculation = (
         const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
         const totalDurationSeconds = totalDurationMinutes * 60;
 
-        // Calculate width of each step in %
+        // Calculate width of each step in %（0除算ガード: 合計0なら全工程0幅）
         const stepWidths = steps.map(s =>
-            (s.durationMinutes * 60 / totalDurationSeconds) * 100
+            totalDurationSeconds > 0
+                ? (s.durationMinutes * 60 / totalDurationSeconds) * 100
+                : 0
         );
 
         // Calculate cumulative positions for tooltip placement

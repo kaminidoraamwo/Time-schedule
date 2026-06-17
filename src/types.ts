@@ -25,6 +25,9 @@ export type StepRecordWithName = StepRecord & {
 
 export type FinishReason = 'completed' | 'skipped' | null;
 
+// 'live'=本番（自由編集・変更後予定で判定） / 'practice'=練習（予定ロック・当初予定で判定）
+export type TimerMode = 'live' | 'practice';
+
 export type TimerState = {
   isActive: boolean;
   startTime: number | null;
@@ -37,6 +40,8 @@ export type TimerState = {
   pausedAt: number | null;
   totalPausedMs: number;
   workingSteps?: Step[]; // 任意: START時に固定する工程のワーキングコピー。セッション中の真実源
+  originalTotalPlannedSeconds?: number; // 任意: START時に固定する当初総予定秒。進捗/完了予定の分母baseline
+  mode?: TimerMode; // 任意: 本番/練習モード。MVPは器のみ（既定 'live'）
 };
 
 // === History Types ===

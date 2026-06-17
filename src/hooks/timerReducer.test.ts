@@ -36,6 +36,16 @@ describe('timerReducer START', () => {
     expect(next.workingSteps).toHaveLength(3);
   });
 
+  it('snapshots the original total planned seconds and mode as baseline', () => {
+    const next = timerReducer(INITIAL_TIMER_STATE, {
+      type: 'START',
+      payload: { currentTime: 1000, steps: steps() },
+    });
+    // 20+10+30 = 60分 = 3600秒
+    expect(next.originalTotalPlannedSeconds).toBe(3600);
+    expect(next.mode).toBe('live');
+  });
+
   it('is a no-op when already active', () => {
     const active: TimerState = { ...INITIAL_TIMER_STATE, isActive: true, startTime: 500 };
     const next = timerReducer(active, {

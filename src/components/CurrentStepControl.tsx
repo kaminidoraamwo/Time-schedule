@@ -68,7 +68,8 @@ export const CurrentStepControl: React.FC<Props> = ({
     className = '',
 }) => {
     const plannedSeconds = step.durationMinutes * 60;
-    const progressRatio = stepElapsedSeconds / plannedSeconds;
+    // 0除算ガード: 予定0分なら進捗比0（NaN防止）
+    const progressRatio = plannedSeconds > 0 ? stepElapsedSeconds / plannedSeconds : 0;
     const overtimeSeconds = Math.max(0, stepElapsedSeconds - plannedSeconds);
     const remainingSeconds = Math.max(0, plannedSeconds - stepElapsedSeconds);
 

@@ -24,6 +24,8 @@ export const INITIAL_TIMER_STATE: TimerState = {
     pausedAt: null,
     totalPausedMs: 0,
     workingSteps: [],
+    originalTotalPlannedSeconds: 0,
+    mode: 'live',
 };
 
 // === Reducer ===
@@ -43,6 +45,9 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 totalPausedMs: 0,
                 // START時に工程をディープコピーで固定（セッション中の真実源）
                 workingSteps: steps.map(step => ({ ...step })),
+                // 当初総予定を分母baselineとして固定（編集で分母が跳ねないようにする土台）
+                originalTotalPlannedSeconds: steps.reduce((acc, step) => acc + step.durationMinutes * 60, 0),
+                mode: 'live',
             };
         }
 
