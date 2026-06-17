@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SCHEDULE_STEPS, STORAGE_KEYS } from '../constants';
+import { SCHEDULE_STEPS, STORAGE_KEYS, TEMPLATES } from '../constants';
 import type { Step, Preset } from '../types';
 
 const STORAGE_KEY = STORAGE_KEYS.SETTINGS;
@@ -76,6 +76,14 @@ export const useSettings = () => {
         setPresets(prev => [...prev, newPreset]);
     }, [steps]);
 
+    const applyTemplate = useCallback((templateId: string) => {
+        const template = TEMPLATES.find(t => t.id === templateId);
+        if (template) {
+            // 同梱テンプレの定数を共有しないよう各工程をディープコピー
+            setSteps(template.steps.map(step => ({ ...step })));
+        }
+    }, []);
+
     const loadPreset = useCallback((presetId: string) => {
         const preset = presets.find(p => p.id === presetId);
         if (preset) {
@@ -99,6 +107,7 @@ export const useSettings = () => {
         resetToDefault,
         savePreset,
         loadPreset,
-        deletePreset
+        deletePreset,
+        applyTemplate
     };
 };

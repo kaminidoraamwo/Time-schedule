@@ -51,6 +51,10 @@ export type Preset = {
   id: string;
   name: string;
   steps: Step[];
+  icon?: string; // 任意: ギャラリー表示用の絵文字（例: '💧'）
+  category?: string; // 任意: フィルタ用
+  isTemplate?: boolean; // 任意: 同梱テンプレ（true）か、ユーザー保存プリセット（false/未定義）か
+  createdAt?: number; // 任意: 作成時刻（Unix ミリ秒）
 };
 
 // === Progress Status Types ===

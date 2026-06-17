@@ -3,6 +3,7 @@ import type { Step } from '../../types';
 
 type Props = {
     steps: Step[];
+    invalidStepIds?: number[];
     onUpdateStep: (id: number, field: keyof Step, value: string | number) => void;
     onAddStep: () => void;
     onRemoveStep: (id: number) => void;
@@ -11,6 +12,7 @@ type Props = {
 
 export const ScheduleEditor: React.FC<Props> = ({
     steps,
+    invalidStepIds = [],
     onUpdateStep,
     onAddStep,
     onRemoveStep,
@@ -20,8 +22,10 @@ export const ScheduleEditor: React.FC<Props> = ({
         <div>
             <h3 className="font-serif text-lg text-ink mb-3">スケジュール編集</h3>
             <div className="space-y-4">
-                {steps.map((step, index) => (
-                    <div key={step.id} className="bg-cream-alt p-4 rounded-none border border-line">
+                {steps.map((step, index) => {
+                    const isInvalid = invalidStepIds.includes(step.id);
+                    return (
+                    <div key={step.id} className={`bg-cream-alt p-4 rounded-none border ${isInvalid ? 'border-red-400' : 'border-line'}`}>
                         <div className="flex flex-col gap-3">
                             {/* Row 1: Move Controls and Name */}
                             <div className="flex items-center gap-3 w-full">
@@ -106,9 +110,16 @@ export const ScheduleEditor: React.FC<Props> = ({
                                     </button>
                                 </div>
                             </div>
+
+                            {isInvalid && (
+                                <p className="text-sm text-red-500 pl-8">
+                                    時間を1分以上に設定してください
+                                </p>
+                            )}
                         </div>
                     </div>
-                ))}
+                    );
+                })}
             </div>
 
             <button

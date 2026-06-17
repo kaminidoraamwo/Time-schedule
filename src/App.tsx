@@ -9,6 +9,7 @@ import { ActiveTimerView } from './components/ActiveTimerView';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
 import { HistoryView } from './components/HistoryView';
+import { getTotalDurationMinutes, validateSchedule } from './utils/schedule';
 
 function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -25,7 +26,8 @@ function App() {
     presets,
     savePreset,
     loadPreset,
-    deletePreset
+    deletePreset,
+    applyTemplate
   } = useSettings();
 
   const {
@@ -51,7 +53,8 @@ function App() {
   useWakeLock(state.isActive && !state.isPaused);
 
   const isNotStarted = !state.isActive && state.currentStepIndex === 0 && !isFinished;
-  const totalDurationMinutes = steps.reduce((acc, s) => acc + s.durationMinutes, 0);
+  const totalDurationMinutes = getTotalDurationMinutes(steps);
+  const canStart = validateSchedule(steps).isValid;
 
   return (
     <div className="min-h-screen bg-cream text-ink font-sans">
@@ -75,6 +78,7 @@ function App() {
         onSavePreset={savePreset}
         onLoadPreset={loadPreset}
         onDeletePreset={deletePreset}
+        onApplyTemplate={applyTemplate}
       />
 
       {/* 履歴画面 */}
@@ -113,6 +117,7 @@ function App() {
           <StartScreen
             stepsCount={steps.length}
             totalDurationMinutes={totalDurationMinutes}
+            canStart={canStart}
             onStart={start}
             onOpenHistory={() => setIsHistoryOpen(true)}
           />
