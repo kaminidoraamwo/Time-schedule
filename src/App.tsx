@@ -9,10 +9,28 @@ import { ActiveTimerView } from './components/ActiveTimerView';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
 import { HistoryView } from './components/HistoryView';
+import { Onboarding } from './components/Onboarding';
 import { getTotalDurationMinutes, validateSchedule } from './utils/schedule';
+import { STORAGE_KEYS } from './constants';
 
 function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isOnboarded, setIsOnboarded] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.ONBOARDED) === 'true';
+    } catch {
+      return true; // localStorage 不可ならオンボーディングは出さない
+    }
+  });
+
+  const completeOnboarding = () => {
+    setIsOnboarded(true);
+    try {
+      localStorage.setItem(STORAGE_KEYS.ONBOARDED, 'true');
+    } catch {
+      // 保存失敗は無視（次回また表示されるだけ）
+    }
+  };
 
   const {
     steps,
@@ -29,7 +47,8 @@ function App() {
     deletePreset,
     applyTemplate,
     duplicateStep,
-    addNamedStep
+    addNamedStep,
+    reorderSteps
   } = useSettings();
 
   const {
@@ -74,6 +93,13 @@ function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
+      {!isOnboarded && isNotStarted && (
+        <Onboarding
+          onSelectTemplate={(id) => { applyTemplate(id); completeOnboarding(); }}
+          onSkip={completeOnboarding}
+        />
+      )}
+
       <Settings
         steps={steps}
         presets={presets}
@@ -90,6 +116,7 @@ function App() {
         onApplyTemplate={applyTemplate}
         onDuplicateStep={duplicateStep}
         onAddNamedStep={addNamedStep}
+        onReorderStep={reorderSteps}
       />
 
       {/* 履歴画面 */}

@@ -82,6 +82,16 @@ export const useSettings = () => {
         });
     }, []);
 
+    const reorderSteps = useCallback((from: number, to: number) => {
+        setSteps(prev => {
+            if (from === to || from < 0 || to < 0 || from >= prev.length || to >= prev.length) return prev;
+            const arr = [...prev];
+            const [moved] = arr.splice(from, 1);
+            arr.splice(to, 0, moved);
+            return arr;
+        });
+    }, []);
+
     const resetToDefault = useCallback(() => {
         setSteps(SCHEDULE_STEPS);
     }, []);
@@ -129,6 +139,7 @@ export const useSettings = () => {
         deletePreset,
         applyTemplate,
         duplicateStep,
-        addNamedStep
+        addNamedStep,
+        reorderSteps
     };
 };

@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   SETTINGS: 'salon-pacer-settings',
   PRESETS: 'salon-pacer-presets',
   HISTORY: 'salon-pacer-history',
+  ONBOARDED: 'salon-pacer-onboarded',
 } as const;
 
 // 履歴の最大保存件数

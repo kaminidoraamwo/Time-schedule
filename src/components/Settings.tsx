@@ -25,6 +25,7 @@ type SettingsProps = {
     onApplyTemplate: (id: string) => void;
     onDuplicateStep: (id: number) => void;
     onAddNamedStep: (name: string) => void;
+    onReorderStep: (from: number, to: number) => void;
 };
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -43,6 +44,7 @@ export const Settings: React.FC<SettingsProps> = ({
     onApplyTemplate,
     onDuplicateStep,
     onAddNamedStep,
+    onReorderStep,
 }) => {
     // Confirmation State
     const [confirmState, setConfirmState] = useState<{
@@ -132,6 +134,7 @@ export const Settings: React.FC<SettingsProps> = ({
                         onMoveStep={onMoveStep}
                         onDuplicateStep={onDuplicateStep}
                         onAddNamedStep={onAddNamedStep}
+                        onReorderStep={onReorderStep}
                     />
                 </div>
 

@@ -69,6 +69,29 @@ describe('useSettings.duplicateStep', () => {
   });
 });
 
+describe('useSettings.reorderSteps', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('moves a step from one index to another immutably', () => {
+    const { result } = renderHook(() => useSettings());
+    act(() => result.current.applyTemplate('tpl-treatment')); // 5工程
+    const names = result.current.steps.map((s) => s.name);
+
+    act(() => result.current.reorderSteps(0, 2)); // 先頭を index2 へ
+
+    const moved = result.current.steps.map((s) => s.name);
+    expect(moved).toEqual([names[1], names[2], names[0], names[3], names[4]]);
+  });
+
+  it('is a no-op for out-of-range indices', () => {
+    const { result } = renderHook(() => useSettings());
+    act(() => result.current.applyTemplate('tpl-treatment'));
+    const before = result.current.steps;
+    act(() => result.current.reorderSteps(0, 99));
+    expect(result.current.steps).toEqual(before);
+  });
+});
+
 describe('useSettings.addNamedStep', () => {
   beforeEach(() => localStorage.clear());
 
