@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import type { StepRecord, Step, FinishReason } from '../types';
+import type { StepRecord, Step, FinishReason, TimerMode } from '../types';
 import { formatTimeJapanese, formatDateJapanese } from '../utils/time';
 
 type Props = {
@@ -8,6 +8,7 @@ type Props = {
     onReset: () => void;
     finishReason: FinishReason;
     startTime: number | null;
+    mode?: TimerMode;
     onSaveHistory: (completedSteps: StepRecord[], steps: Step[], startTime: number | null) => void;
 };
 
@@ -17,6 +18,7 @@ export const SummaryView: React.FC<Props> = ({
     onReset,
     finishReason,
     startTime,
+    mode,
     onSaveHistory,
 }) => {
     const hasSaved = useRef(false);
@@ -38,6 +40,14 @@ export const SummaryView: React.FC<Props> = ({
         <div className="max-w-2xl mx-auto p-6 bg-cream border border-line rounded-none">
             {/* 完了時刻 */}
             <h2 className="font-serif text-xl mb-4 text-center text-ink">{formatDateJapanese(new Date())}</h2>
+
+            {mode === 'practice' && (
+                <div className="mb-4 flex justify-center">
+                    <span className="px-3 py-1 bg-forest/10 border border-forest/40 text-forest text-sm rounded-none">
+                        練習モード — 予定どおり進められたか確認しましょう
+                    </span>
+                </div>
+            )}
 
             {finishReason === 'skipped' && (
                 <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-none text-center text-yellow-700 text-sm">

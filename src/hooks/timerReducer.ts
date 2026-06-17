@@ -1,8 +1,8 @@
-import type { TimerState, StepRecord, Step } from '../types';
+import type { TimerState, StepRecord, Step, TimerMode } from '../types';
 
 // === Action Types ===
 export type TimerAction =
-    | { type: 'START'; payload: { currentTime: number; steps: Step[] } }
+    | { type: 'START'; payload: { currentTime: number; steps: Step[]; mode?: TimerMode } }
     | { type: 'NEXT_STEP'; payload: { currentTime: number; newRecord: StepRecord; isLastStep: boolean } }
     | { type: 'PREVIOUS_STEP'; payload: { restoredStartTime: number } }
     | { type: 'SKIP_TO_FINISH'; payload: { stepsLength: number } }
@@ -50,7 +50,7 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
                 workingSteps: steps.map(step => ({ ...step })),
                 // 当初総予定を分母baselineとして固定（編集で分母が跳ねないようにする土台）
                 originalTotalPlannedSeconds: steps.reduce((acc, step) => acc + step.durationMinutes * 60, 0),
-                mode: 'live',
+                mode: action.payload.mode ?? 'live',
             };
         }
 

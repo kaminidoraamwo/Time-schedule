@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useCallback, useRef, useState } from 'react';
 import { STORAGE_KEYS } from '../constants';
-import type { Step, StepRecord } from '../types';
+import type { Step, StepRecord, TimerMode } from '../types';
 import { useSound } from './useSound';
 import { timerReducer, loadTimerState } from './timerReducer';
 
@@ -43,10 +43,10 @@ export const useTimer = (steps: Step[]) => {
     }, [state.isActive, state.isPaused]);
 
     // === Actions ===
-    const start = useCallback(() => {
+    const start = useCallback((mode: TimerMode = 'live') => {
         initAudio();
         // live steps をディープコピーしてスナップショット（編集が進行中セッションを壊さない）
-        dispatch({ type: 'START', payload: { currentTime: Date.now(), steps: steps.map(s => ({ ...s })) } });
+        dispatch({ type: 'START', payload: { currentTime: Date.now(), steps: steps.map(s => ({ ...s })), mode } });
     }, [initAudio, steps]);
 
     const nextStep = useCallback(() => {

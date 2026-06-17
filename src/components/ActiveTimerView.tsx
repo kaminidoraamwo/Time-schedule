@@ -15,6 +15,7 @@ type Props = {
     stepElapsedSeconds: number;
     now: number;
     isPaused: boolean;
+    isEditable?: boolean;
     totalDurationMinutes: number;
     onNextStep: () => void;
     onPreviousStep: () => void;
@@ -33,6 +34,7 @@ export const ActiveTimerView: React.FC<Props> = ({
     stepElapsedSeconds,
     now,
     isPaused,
+    isEditable = true,
     totalDurationMinutes,
     onNextStep,
     onPreviousStep,
@@ -159,13 +161,15 @@ export const ActiveTimerView: React.FC<Props> = ({
                                 {isPaused ? '▶ 再開（長押し）' : '⏸ 一時停止（長押し）'}
                             </LongPressButton>
 
-                            {/* 施術中の工程編集（開くとタイマーは自動で一時停止） */}
-                            <button
-                                onClick={openEdit}
-                                className="px-5 py-2 border border-ink/40 text-ink-soft rounded-none text-sm hover:bg-ink/5 hover:text-ink transition-colors mt-2"
-                            >
-                                ✎ 工程を編集
-                            </button>
+                            {/* 施術中の工程編集（開くとタイマーは自動で一時停止）。練習モードでは非表示 */}
+                            {isEditable && (
+                                <button
+                                    onClick={openEdit}
+                                    className="px-5 py-2 border border-ink/40 text-ink-soft rounded-none text-sm hover:bg-ink/5 hover:text-ink transition-colors mt-2"
+                                >
+                                    ✎ 工程を編集
+                                </button>
+                            )}
 
                             <LongPressButton
                                 onAction={onSkipToFinish}

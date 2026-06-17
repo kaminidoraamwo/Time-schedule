@@ -170,6 +170,7 @@ function App() {
             stepElapsedSeconds={stepElapsedSeconds}
             now={now}
             isPaused={state.isPaused}
+            isEditable={state.mode !== 'practice'}
             totalDurationMinutes={activeTotalDurationMinutes}
             onNextStep={nextStep}
             onPreviousStep={previousStep}
@@ -188,6 +189,7 @@ function App() {
             onReset={reset}
             finishReason={state.finishReason}
             startTime={state.startTime}
+            mode={state.mode}
             onSaveHistory={addRecord}
           />
         )}

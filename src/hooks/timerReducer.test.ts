@@ -46,6 +46,14 @@ describe('timerReducer START', () => {
     expect(next.mode).toBe('live');
   });
 
+  it('starts in practice mode when requested', () => {
+    const next = timerReducer(INITIAL_TIMER_STATE, {
+      type: 'START',
+      payload: { currentTime: 1000, steps: steps(), mode: 'practice' },
+    });
+    expect(next.mode).toBe('practice');
+  });
+
   it('is a no-op when already active', () => {
     const active: TimerState = { ...INITIAL_TIMER_STATE, isActive: true, startTime: 500 };
     const next = timerReducer(active, {
