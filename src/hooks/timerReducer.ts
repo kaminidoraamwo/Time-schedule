@@ -8,6 +8,9 @@ export type TimerAction =
     | { type: 'SKIP_TO_FINISH'; payload: { stepsLength: number } }
     | { type: 'PAUSE'; payload: { currentTime: number } }
     | { type: 'RESUME'; payload: { currentTime: number } }
+    | { type: 'INSERT_FUTURE_STEP'; payload: { index: number; step: Step } }
+    | { type: 'SKIP_FUTURE_STEP'; payload: { index: number } }
+    | { type: 'RESTORE_WORKING_STEPS'; payload: { steps: Step[] } }
     | { type: 'DISMISS_STALE' }
     | { type: 'RESET' };
 
@@ -114,6 +117,32 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
             };
         }
 
+
+        case 'INSERT_FUTURE_STEP': {
+            // これからの工程（index > currentStepIndex）にのみ挿入可。現在/過去は不可。
+            if (!state.isActive) return state;
+            const ws = state.workingSteps ?? [];
+            const { index, step } = action.payload;
+            if (index <= state.currentStepIndex || index > ws.length) return state;
+            return { ...state, workingSteps: [...ws.slice(0, index), step, ...ws.slice(index)] };
+        }
+
+        case 'SKIP_FUTURE_STEP': {
+            // これからの工程（index > currentStepIndex）のみスキップ可。実績は計上しない。
+            if (!state.isActive) return state;
+            const ws = state.workingSteps ?? [];
+            const { index } = action.payload;
+            if (index <= state.currentStepIndex || index >= ws.length) return state;
+            return { ...state, workingSteps: [...ws.slice(0, index), ...ws.slice(index + 1)] };
+        }
+
+        case 'RESTORE_WORKING_STEPS': {
+            // Undo 用: 直前の workingSteps スナップショットへ復元。現在地を割る復元は拒否。
+            if (!state.isActive) return state;
+            const { steps } = action.payload;
+            if (steps.length <= state.currentStepIndex) return state;
+            return { ...state, workingSteps: steps };
+        }
 
         case 'DISMISS_STALE':
             return INITIAL_TIMER_STATE;

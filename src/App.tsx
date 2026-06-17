@@ -32,6 +32,7 @@ function App() {
 
   const {
     state,
+    now,
     activeSteps,
     currentStep,
     totalElapsedSeconds,
@@ -46,6 +47,9 @@ function App() {
     skipToFinish,
     togglePause,
     dismissStaleSession,
+    insertFutureStep,
+    skipFutureStep,
+    restoreWorkingSteps,
   } = useTimer(steps);
 
   const { history, addRecord, deleteRecord, clearAll } = useHistory();
@@ -133,12 +137,16 @@ function App() {
             currentStep={currentStep || undefined}
             totalElapsedSeconds={totalElapsedSeconds}
             stepElapsedSeconds={stepElapsedSeconds}
+            now={now}
             isPaused={state.isPaused}
             totalDurationMinutes={activeTotalDurationMinutes}
             onNextStep={nextStep}
             onPreviousStep={previousStep}
             onTogglePause={togglePause}
             onSkipToFinish={skipToFinish}
+            onInsertStep={insertFutureStep}
+            onSkipStep={skipFutureStep}
+            onRestoreSteps={restoreWorkingSteps}
           />
         )}
 

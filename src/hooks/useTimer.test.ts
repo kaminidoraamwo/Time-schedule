@@ -73,6 +73,44 @@ describe('useTimer workingSteps fixation (Track B Wave 1)', () => {
     expect(result.current.state.currentStepIndex).toBe(1);
   });
 
+  it('inserts a future step after the current one without moving the current step', () => {
+    const { result } = renderHook(({ steps }) => useTimer(steps), {
+      initialProps: { steps: baseSteps },
+    });
+    act(() => {
+      result.current.start();
+    });
+    act(() => {
+      result.current.insertFutureStep({ name: 'カット差し込み', durationMinutes: 15 });
+    });
+
+    expect(result.current.activeSteps).toHaveLength(4);
+    // 現在工程は不変、挿入は直後
+    expect(result.current.currentStep?.name).toBe('カウンセリング');
+    expect(result.current.activeSteps[1].name).toBe('カット差し込み');
+    expect(result.current.state.currentStepIndex).toBe(0);
+  });
+
+  it('skips a future step and can undo via restoreWorkingSteps', () => {
+    const { result } = renderHook(({ steps }) => useTimer(steps), {
+      initialProps: { steps: baseSteps },
+    });
+    act(() => {
+      result.current.start();
+    });
+
+    const before = result.current.activeSteps;
+    act(() => {
+      result.current.skipFutureStep(2); // 「薬剤放置」をスキップ
+    });
+    expect(result.current.activeSteps.map((s) => s.name)).toEqual(['カウンセリング', 'シャンプー']);
+
+    act(() => {
+      result.current.restoreWorkingSteps(before);
+    });
+    expect(result.current.activeSteps).toHaveLength(3);
+  });
+
   it('falls back to live steps after reset', () => {
     const { result, rerender } = renderHook(({ steps }) => useTimer(steps), {
       initialProps: { steps: baseSteps },

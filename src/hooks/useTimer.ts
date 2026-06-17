@@ -102,6 +102,24 @@ export const useTimer = (steps: Step[]) => {
         dispatch({ type: 'DISMISS_STALE' });
     }, []);
 
+    // === 施術中の工程編集（第3波 MVP: 未来工程の挿入/スキップ） ===
+    const insertFutureStep = useCallback((draft: { name: string; durationMinutes: number }, index?: number) => {
+        const ws = state.workingSteps ?? [];
+        const newId = Math.max(0, ...ws.map(s => s.id)) + 1;
+        const step: Step = { id: newId, name: draft.name, durationMinutes: draft.durationMinutes };
+        // 既定は現在工程の直後（これからの工程）に挿入
+        const targetIndex = index ?? state.currentStepIndex + 1;
+        dispatch({ type: 'INSERT_FUTURE_STEP', payload: { index: targetIndex, step } });
+    }, [state.workingSteps, state.currentStepIndex]);
+
+    const skipFutureStep = useCallback((index: number) => {
+        dispatch({ type: 'SKIP_FUTURE_STEP', payload: { index } });
+    }, []);
+
+    const restoreWorkingSteps = useCallback((restored: Step[]) => {
+        dispatch({ type: 'RESTORE_WORKING_STEPS', payload: { steps: restored } });
+    }, []);
+
     const togglePause = useCallback(() => {
         const currentTime = Date.now();
         if (state.isPaused) {
@@ -163,5 +181,8 @@ export const useTimer = (steps: Step[]) => {
         skipToFinish,
         togglePause,
         dismissStaleSession,
+        insertFutureStep,
+        skipFutureStep,
+        restoreWorkingSteps,
     };
 };

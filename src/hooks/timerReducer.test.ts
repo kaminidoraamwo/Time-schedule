@@ -89,6 +89,84 @@ describe('timerReducer NEXT_STEP', () => {
   });
 });
 
+describe('timerReducer INSERT_FUTURE_STEP (Wave 3)', () => {
+  const started = () =>
+    timerReducer(INITIAL_TIMER_STATE, { type: 'START', payload: { currentTime: 1000, steps: steps() } });
+
+  const newStep: Step = { id: 99, name: 'カット差し込み', durationMinutes: 15 };
+
+  it('inserts a future step without touching currentStepIndex or completedSteps', () => {
+    const state = started(); // currentStepIndex=0, workingSteps=[1,2,3]
+    const next = timerReducer(state, {
+      type: 'INSERT_FUTURE_STEP',
+      payload: { index: 1, step: newStep },
+    });
+
+    expect(next.workingSteps?.map((s) => s.id)).toEqual([1, 99, 2, 3]);
+    expect(next.currentStepIndex).toBe(0);
+    expect(next.completedSteps).toBe(state.completedSteps);
+    // baseline は固定のまま
+    expect(next.originalTotalPlannedSeconds).toBe(state.originalTotalPlannedSeconds);
+  });
+
+  it('rejects insertion at or before the current step', () => {
+    const state = started();
+    expect(timerReducer(state, { type: 'INSERT_FUTURE_STEP', payload: { index: 0, step: newStep } })).toBe(state);
+  });
+
+  it('rejects insertion out of range', () => {
+    const state = started();
+    expect(timerReducer(state, { type: 'INSERT_FUTURE_STEP', payload: { index: 99, step: newStep } })).toBe(state);
+  });
+
+  it('is a no-op when not active', () => {
+    expect(
+      timerReducer(INITIAL_TIMER_STATE, { type: 'INSERT_FUTURE_STEP', payload: { index: 1, step: newStep } }),
+    ).toBe(INITIAL_TIMER_STATE);
+  });
+});
+
+describe('timerReducer SKIP_FUTURE_STEP (Wave 3)', () => {
+  const started = () =>
+    timerReducer(INITIAL_TIMER_STATE, { type: 'START', payload: { currentTime: 1000, steps: steps() } });
+
+  it('removes a future step without touching currentStepIndex or completedSteps', () => {
+    const state = started(); // currentStepIndex=0, workingSteps=[1,2,3]
+    const next = timerReducer(state, { type: 'SKIP_FUTURE_STEP', payload: { index: 2 } });
+
+    expect(next.workingSteps?.map((s) => s.id)).toEqual([1, 2]);
+    expect(next.currentStepIndex).toBe(0);
+    expect(next.completedSteps).toBe(state.completedSteps);
+  });
+
+  it('rejects skipping the current or a past step', () => {
+    const state = started();
+    expect(timerReducer(state, { type: 'SKIP_FUTURE_STEP', payload: { index: 0 } })).toBe(state);
+  });
+});
+
+describe('timerReducer RESTORE_WORKING_STEPS (Wave 3 undo)', () => {
+  it('restores a prior working steps snapshot', () => {
+    const s = timerReducer(INITIAL_TIMER_STATE, { type: 'START', payload: { currentTime: 1000, steps: steps() } });
+    const prior: Step[] = [
+      { id: 1, name: 'A', durationMinutes: 20 },
+      { id: 2, name: 'B', durationMinutes: 10 },
+    ];
+    const next = timerReducer(s, { type: 'RESTORE_WORKING_STEPS', payload: { steps: prior } });
+    expect(next.workingSteps).toEqual(prior);
+  });
+
+  it('rejects a restore that would drop below the current step', () => {
+    const s = timerReducer(INITIAL_TIMER_STATE, { type: 'START', payload: { currentTime: 1000, steps: steps() } });
+    const advanced = timerReducer(s, {
+      type: 'NEXT_STEP',
+      payload: { currentTime: 2000, newRecord: makeRecord(), isLastStep: false },
+    }); // currentStepIndex=1
+    const tooShort: Step[] = [{ id: 1, name: 'A', durationMinutes: 20 }];
+    expect(timerReducer(advanced, { type: 'RESTORE_WORKING_STEPS', payload: { steps: tooShort } })).toBe(advanced);
+  });
+});
+
 describe('timerReducer RESET', () => {
   it('clears workingSteps', () => {
     const started = timerReducer(INITIAL_TIMER_STATE, {
