@@ -37,4 +37,20 @@ describe('StartScreen', () => {
     await userEvent.click(screen.getByRole('button', { name: 'スタート' }));
     expect(onStart).toHaveBeenCalledOnce();
   });
+
+  it('shows a back-to-menu control when onBack is provided', async () => {
+    const onBack = vi.fn();
+    render(
+      <StartScreen
+        stepsCount={3}
+        totalDurationMinutes={60}
+        canStart
+        onStart={noop}
+        onBack={onBack}
+        onOpenHistory={noop}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: '← メニューを選び直す' }));
+    expect(onBack).toHaveBeenCalledOnce();
+  });
 });

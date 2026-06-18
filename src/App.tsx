@@ -4,33 +4,19 @@ import { useSettings } from './hooks/useSettings';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useHistory } from './hooks/useHistory';
 import { Header } from './components/Header';
+import { MenuSelectScreen } from './components/MenuSelectScreen';
 import { StartScreen } from './components/StartScreen';
 import { ActiveTimerView } from './components/ActiveTimerView';
 import { SummaryView } from './components/SummaryView';
 import { Settings } from './components/Settings';
 import { HistoryView } from './components/HistoryView';
-import { Onboarding } from './components/Onboarding';
 import { getTotalDurationMinutes, validateSchedule } from './utils/schedule';
-import { STORAGE_KEYS } from './constants';
+import { TEMPLATES } from './constants';
 
 function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isOnboarded, setIsOnboarded] = useState(() => {
-    try {
-      return localStorage.getItem(STORAGE_KEYS.ONBOARDED) === 'true';
-    } catch {
-      return true; // localStorage 不可ならオンボーディングは出さない
-    }
-  });
-
-  const completeOnboarding = () => {
-    setIsOnboarded(true);
-    try {
-      localStorage.setItem(STORAGE_KEYS.ONBOARDED, 'true');
-    } catch {
-      // 保存失敗は無視（次回また表示されるだけ）
-    }
-  };
+  // 開始前の2段階フロー: 'menu'=メニュー選択 / 'ready'=スタート画面
+  const [flowPhase, setFlowPhase] = useState<'menu' | 'ready'>('menu');
 
   const {
     steps,
@@ -48,7 +34,9 @@ function App() {
     applyTemplate,
     duplicateStep,
     addNamedStep,
-    reorderSteps
+    reorderSteps,
+    activeMenuName,
+    isMenuDirty
   } = useSettings();
 
   const {
@@ -84,6 +72,21 @@ function App() {
   // 進行中/完了サマリーは固定済みの activeSteps を真実源にする（設定編集の影響を受けない）
   const activeTotalDurationMinutes = getTotalDurationMinutes(activeSteps);
 
+  // メニューでテンプレ/プリセットを選んだら、その設定を適用してスタート画面へ進む。
+  const handleSelectTemplate = (id: string) => {
+    applyTemplate(id);
+    setFlowPhase('ready');
+  };
+  const handleLoadPreset = (id: string) => {
+    loadPreset(id);
+    setFlowPhase('ready');
+  };
+  // セッション終了後は次の人のためにメニュー選択からやり直す。
+  const handleResetToMenu = () => {
+    reset();
+    setFlowPhase('menu');
+  };
+
   return (
     <div className="min-h-screen bg-cream text-ink font-sans">
       <Header
@@ -93,27 +96,17 @@ function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {!isOnboarded && isNotStarted && (
-        <Onboarding
-          onSelectTemplate={(id) => { applyTemplate(id); completeOnboarding(); }}
-          onSkip={completeOnboarding}
-        />
-      )}
-
       <Settings
         steps={steps}
-        presets={presets}
         isOpen={isSettingsOpen}
+        menuName={activeMenuName}
+        isMenuDirty={isMenuDirty}
         onClose={() => setIsSettingsOpen(false)}
         onUpdateStep={updateStep}
         onAddStep={addStep}
         onRemoveStep={removeStep}
         onMoveStep={moveStep}
         onResetToDefault={resetToDefault}
-        onSavePreset={savePreset}
-        onLoadPreset={loadPreset}
-        onDeletePreset={deletePreset}
-        onApplyTemplate={applyTemplate}
         onDuplicateStep={duplicateStep}
         onAddNamedStep={addNamedStep}
         onReorderStep={reorderSteps}
@@ -151,12 +144,32 @@ function App() {
       )}
 
       <main className={`container mx-auto max-w-3xl ${state.isActive ? 'px-2' : 'px-4'}`}>
-        {isNotStarted && (
+        {isNotStarted && flowPhase === 'menu' && (
+          <MenuSelectScreen
+            templates={TEMPLATES}
+            presets={presets}
+            menuName={activeMenuName}
+            isMenuDirty={isMenuDirty}
+            currentStepsCount={steps.length}
+            currentTotalMinutes={totalDurationMinutes}
+            onSelectTemplate={handleSelectTemplate}
+            onSavePreset={savePreset}
+            onLoadPreset={handleLoadPreset}
+            onDeletePreset={deletePreset}
+            onProceedWithCurrent={() => setFlowPhase('ready')}
+            onOpenHistory={() => setIsHistoryOpen(true)}
+          />
+        )}
+
+        {isNotStarted && flowPhase === 'ready' && (
           <StartScreen
             stepsCount={steps.length}
             totalDurationMinutes={totalDurationMinutes}
             canStart={canStart}
+            menuName={activeMenuName}
+            isMenuDirty={isMenuDirty}
             onStart={start}
+            onBack={() => setFlowPhase('menu')}
             onOpenHistory={() => setIsHistoryOpen(true)}
           />
         )}
@@ -186,7 +199,7 @@ function App() {
           <SummaryView
             steps={activeSteps}
             completedSteps={state.completedSteps}
-            onReset={reset}
+            onReset={handleResetToMenu}
             finishReason={state.finishReason}
             startTime={state.startTime}
             mode={state.mode}

@@ -5,7 +5,10 @@ type Props = {
     stepsCount: number;
     totalDurationMinutes: number;
     canStart?: boolean;
+    menuName?: string;
+    isMenuDirty?: boolean;
     onStart: (mode: TimerMode) => void;
+    onBack?: () => void;
     onOpenHistory: () => void;
 };
 
@@ -13,14 +16,36 @@ export const StartScreen: React.FC<Props> = ({
     stepsCount,
     totalDurationMinutes,
     canStart = true,
+    menuName,
+    isMenuDirty = false,
     onStart,
+    onBack,
     onOpenHistory,
 }) => {
     const [mode, setMode] = useState<TimerMode>('live');
     const isStartDisabled = stepsCount === 0 || !canStart;
     return (
         <div className="flex flex-col items-center justify-center h-[60vh]">
-            <h2 className="font-serif text-4xl mb-8 text-ink">準備はいいですか？</h2>
+            {onBack && (
+                <button
+                    onClick={onBack}
+                    className="self-start mb-4 text-sm text-ink-soft hover:text-ink transition-colors"
+                >
+                    ← メニューを選び直す
+                </button>
+            )}
+
+            {menuName ? (
+                <div className="mb-8 text-center">
+                    <p className="text-sm text-ink-soft mb-1">このメニューで始めます</p>
+                    <h2 className="font-serif text-4xl text-ink">『{menuName}』</h2>
+                    {isMenuDirty && (
+                        <p className="text-xs text-accent mt-1">工程を編集しています（変更あり）</p>
+                    )}
+                </div>
+            ) : (
+                <h2 className="font-serif text-4xl mb-8 text-ink">準備はいいですか？</h2>
+            )}
             <div className="text-ink-soft mb-8 text-center">
                 合計時間: {Math.floor(totalDurationMinutes / 60)}時間 {totalDurationMinutes % 60}分<br />
                 {stepsCount} 工程
