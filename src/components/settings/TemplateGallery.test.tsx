@@ -16,9 +16,9 @@ describe('TemplateGallery', () => {
     const onSelect = vi.fn();
     render(<TemplateGallery templates={TEMPLATES} onSelectTemplate={onSelect} />);
 
-    const color = TEMPLATES.find((t) => t.name === 'カラー')!;
-    await userEvent.click(screen.getByText('カラー'));
+    const cut = TEMPLATES.find((t) => t.name === 'カット')!;
+    await userEvent.click(screen.getByText('カット'));
 
-    expect(onSelect).toHaveBeenCalledWith(color.id);
+    expect(onSelect).toHaveBeenCalledWith(cut.id);
   });
 });

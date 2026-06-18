@@ -3,10 +3,16 @@ import { TEMPLATES, SCHEDULE_STEPS } from './constants';
 import { validateSchedule } from './utils/schedule';
 
 describe('TEMPLATES', () => {
-  it('includes the four core salon menus', () => {
+  it('includes the confirmed salon menus', () => {
     const names = TEMPLATES.map((t) => t.name);
     expect(names).toEqual(
-      expect.arrayContaining(['縮毛矯正', 'カラー', 'パーマ', 'トリートメント']),
+      expect.arrayContaining([
+        '縮毛矯正',
+        '髪質改善トリートメント α（微還元）',
+        '髪質改善トリートメント β（酸熱）',
+        'カット',
+        'つるりんちょZEROカラー',
+      ]),
     );
   });
 
