@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -17,6 +17,7 @@ import {
 import type { Step } from '../../types';
 import { STEP_PRESET_NAMES } from '../../constants';
 import { SortableStepRow } from './SortableStepRow';
+import { ReorderPanel } from './ReorderPanel';
 
 type Props = {
     steps: Step[];
@@ -41,6 +42,8 @@ export const ScheduleEditor: React.FC<Props> = ({
     onAddNamedStep,
     onReorderStep
 }) => {
+    const [isReorderOpen, setIsReorderOpen] = useState(false);
+
     const sensors = useSensors(
         // ポインタは8px動かしてからドラッグ開始（入力中の誤発火を防ぐ）
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -59,7 +62,17 @@ export const ScheduleEditor: React.FC<Props> = ({
 
     return (
         <div>
-            <h3 className="font-serif text-lg text-ink mb-3">スケジュール編集</h3>
+            <div className="flex justify-between items-center mb-3">
+                <h3 className="font-serif text-lg text-ink">スケジュール編集</h3>
+                {onReorderStep && steps.length > 1 && (
+                    <button
+                        onClick={() => setIsReorderOpen(true)}
+                        className="text-sm border border-line text-ink-soft hover:border-ink hover:text-ink py-1.5 px-3 rounded-none transition-colors"
+                    >
+                        ⇅ 並べ替え
+                    </button>
+                )}
+            </div>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={steps.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-4">
@@ -102,6 +115,14 @@ export const ScheduleEditor: React.FC<Props> = ({
                         ))}
                     </div>
                 </div>
+            )}
+
+            {isReorderOpen && onReorderStep && (
+                <ReorderPanel
+                    steps={steps}
+                    onReorder={onReorderStep}
+                    onClose={() => setIsReorderOpen(false)}
+                />
             )}
         </div>
     );

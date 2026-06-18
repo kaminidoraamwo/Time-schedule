@@ -89,12 +89,12 @@ export const SortableStepRow: React.FC<Props> = ({
                 {/* Row 2a: 時間チップ（ワンタップ） */}
                 <div className="pl-8">
                     <label className="block text-xs text-ink-soft mb-1">時間設定 (分)</label>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
+                    <div className="grid grid-cols-7 gap-1.5 mb-2">
                         {QUICK_DURATIONS.map((d) => (
                             <button
                                 key={d}
                                 onClick={() => onUpdateStep(step.id, 'durationMinutes', d)}
-                                className={`px-2.5 py-1 rounded-none border text-sm transition-colors ${
+                                className={`py-1 rounded-none border text-sm text-center transition-colors ${
                                     step.durationMinutes === d
                                         ? 'bg-ink text-cream border-ink'
                                         : 'bg-cream border-line text-ink-soft hover:border-ink'
