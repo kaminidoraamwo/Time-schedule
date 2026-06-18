@@ -66,10 +66,24 @@ export const TREATMENT_STEPS: Step[] = [
   { id: 5, name: '仕上げ・撮影', durationMinutes: 5 },
 ];
 
+// 髪質改善トリートメント α（微還元・約120分・9工程）。開発者の現場フローに合わせて確定。
+export const KAISHITSU_ALPHA_STEPS: Step[] = [
+  { id: 1, name: 'プレシャンプー', durationMinutes: 10 },
+  { id: 2, name: '準備・薬剤塗布', durationMinutes: 20 },
+  { id: 3, name: '薬剤放置', durationMinutes: 20 },
+  { id: 4, name: '中間水洗', durationMinutes: 10 },
+  { id: 5, name: 'ドライ', durationMinutes: 10 },
+  { id: 6, name: 'アイロン', durationMinutes: 15 },
+  { id: 7, name: '酸化処理', durationMinutes: 5 },
+  { id: 8, name: 'シャンプー', durationMinutes: 10 },
+  { id: 9, name: 'ドライ・仕上げ', durationMinutes: 20 },
+];
+
 // 同梱テンプレート（ユーザー保存プリセットとは別配列で合流表示する）
 export const TEMPLATES: Preset[] = [
   { id: 'tpl-straightening', name: '縮毛矯正', icon: '💧', isTemplate: true, steps: SCHEDULE_STEPS },
   { id: 'tpl-color', name: 'カラー', icon: '🎨', isTemplate: true, steps: COLOR_STEPS },
   { id: 'tpl-perm', name: 'パーマ', icon: '🌀', isTemplate: true, steps: PERM_STEPS },
   { id: 'tpl-treatment', name: 'トリートメント', icon: '✨', isTemplate: true, steps: TREATMENT_STEPS },
+  { id: 'tpl-kaishitsu-alpha', name: '髪質改善トリートメント α（微還元）', icon: '💜', isTemplate: true, steps: KAISHITSU_ALPHA_STEPS },
 ];
