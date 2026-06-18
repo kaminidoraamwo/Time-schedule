@@ -18,6 +18,17 @@ export const getTotalDurationMinutes = (steps: readonly Step[]): number =>
   steps.reduce((acc, step) => acc + step.durationMinutes, 0);
 
 /**
+ * 合計分を「約N時間M分」の見やすいラベルに整形する（カード表示などの概算用）。
+ */
+export const formatTotalDurationLabel = (totalMinutes: number): string => {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `約${minutes}分`;
+  if (minutes === 0) return `約${hours}時間`;
+  return `約${hours}時間${minutes}分`;
+};
+
+/**
  * 開始時刻に合計分を足した「終了予定時刻」を返す。
  * 引数の Date は変更しない（イミュータブル）。
  */
