@@ -101,6 +101,17 @@ export const CUT_STEPS: Step[] = [
   { id: 7, name: '仕上げ', durationMinutes: 5 },
 ];
 
+// つるりんちょZEROカラー（約90分・7工程）。開発者の現場フローに合わせて確定。
+export const TSURURINCHO_ZERO_COLOR_STEPS: Step[] = [
+  { id: 1, name: 'プレシャンプー', durationMinutes: 10 },
+  { id: 2, name: '準備・薬剤塗布', durationMinutes: 25 },
+  { id: 3, name: '薬剤放置', durationMinutes: 20 },
+  { id: 4, name: 'シャンプー', durationMinutes: 10 },
+  { id: 5, name: 'ドライ', durationMinutes: 10 },
+  { id: 6, name: 'ブロー', durationMinutes: 10 },
+  { id: 7, name: '仕上げ', durationMinutes: 5 },
+];
+
 // 同梱テンプレート（ユーザー保存プリセットとは別配列で合流表示する）
 export const TEMPLATES: Preset[] = [
   { id: 'tpl-straightening', name: '縮毛矯正', icon: '💧', isTemplate: true, steps: SCHEDULE_STEPS },
@@ -110,4 +121,5 @@ export const TEMPLATES: Preset[] = [
   { id: 'tpl-kaishitsu-alpha', name: '髪質改善トリートメント α（微還元）', icon: '💜', isTemplate: true, steps: KAISHITSU_ALPHA_STEPS },
   { id: 'tpl-kaishitsu-beta', name: '髪質改善トリートメント β（酸熱）', icon: '🌸', isTemplate: true, steps: KAISHITSU_BETA_STEPS },
   { id: 'tpl-cut', name: 'カット', icon: '✂️', isTemplate: true, steps: CUT_STEPS },
+  { id: 'tpl-tsururincho-zero-color', name: 'つるりんちょZEROカラー', icon: '🌈', isTemplate: true, steps: TSURURINCHO_ZERO_COLOR_STEPS },
 ];
