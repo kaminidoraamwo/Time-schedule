@@ -6,8 +6,11 @@ export const STORAGE_KEYS = {
   SETTINGS: 'salon-pacer-settings',
   PRESETS: 'salon-pacer-presets',
   HISTORY: 'salon-pacer-history',
-  ONBOARDED: 'salon-pacer-onboarded',
+  ACTIVE_MENU: 'salon-pacer-active-menu',
 } as const;
+
+// テンプレ/プリセット未選択（初期状態）のメニュー名。各画面の見出しに使う。
+export const DEFAULT_MENU_NAME = '標準メニュー';
 
 // 履歴の最大保存件数
 export const MAX_HISTORY_COUNT = 100;

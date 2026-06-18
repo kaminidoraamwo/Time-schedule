@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useSettings } from './useSettings';
-import { TEMPLATES } from '../constants';
+import { TEMPLATES, DEFAULT_MENU_NAME } from '../constants';
 
 describe('useSettings.applyTemplate', () => {
   beforeEach(() => {
@@ -94,6 +94,56 @@ describe('useSettings.reorderSteps', () => {
     const before = result.current.steps;
     act(() => result.current.reorderSteps(0, 99));
     expect(result.current.steps).toEqual(before);
+  });
+});
+
+describe('useSettings active menu name', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('starts with the default menu name and no dirty flag', () => {
+    const { result } = renderHook(() => useSettings());
+    expect(result.current.activeMenuName).toBe(DEFAULT_MENU_NAME);
+    expect(result.current.isMenuDirty).toBe(false);
+  });
+
+  it('tracks the template name when a template is applied', () => {
+    const { result } = renderHook(() => useSettings());
+    const cut = TEMPLATES.find((t) => t.name === 'カット')!;
+
+    act(() => result.current.applyTemplate(cut.id));
+
+    expect(result.current.activeMenuName).toBe('カット');
+    expect(result.current.isMenuDirty).toBe(false);
+  });
+
+  it('marks the menu dirty after editing a step, keeping the name', () => {
+    const { result } = renderHook(() => useSettings());
+    act(() => result.current.applyTemplate('tpl-cut'));
+
+    act(() => result.current.updateStep(result.current.steps[0].id, 'durationMinutes', 99));
+
+    expect(result.current.activeMenuName).toBe('カット');
+    expect(result.current.isMenuDirty).toBe(true);
+  });
+
+  it('adopts the preset name and clears dirty when saving a preset', () => {
+    const { result } = renderHook(() => useSettings());
+    act(() => result.current.addStep()); // 何か編集して dirty にする
+
+    act(() => result.current.savePreset('わたしの縮毛'));
+
+    expect(result.current.activeMenuName).toBe('わたしの縮毛');
+    expect(result.current.isMenuDirty).toBe(false);
+  });
+
+  it('resets the menu name to default on resetToDefault', () => {
+    const { result } = renderHook(() => useSettings());
+    act(() => result.current.applyTemplate('tpl-cut'));
+
+    act(() => result.current.resetToDefault());
+
+    expect(result.current.activeMenuName).toBe(DEFAULT_MENU_NAME);
+    expect(result.current.isMenuDirty).toBe(false);
   });
 });
 
